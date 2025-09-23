@@ -1,0 +1,14 @@
+R_DEF: Internal format may change without notice
+local
+color your_background
+color your_error
+color your_onBackground
+color your_onError
+color your_onPrimary
+color your_onSecondary
+color your_onSurface
+color your_primary
+color your_secondary
+color your_surface
+string app_name
+style Theme.Material3.DayNight

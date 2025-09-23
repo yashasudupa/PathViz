@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.urbansetu.app-mergeDebugResources-75:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Achira\\.gradle\\caches\\9.0-milestone-1\\transforms\\bded3f0be4ecbe8893dc9d953a0ff1c0\\transformed\\appcompat-1.5.0\\res\\values-port\\values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}

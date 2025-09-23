@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Material3.DayNight" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Now the manifest name exists but it uses MaterialComponents parent -->
+        <item name="colorPrimary">@color/your_primary</item>
+        <item name="colorOnPrimary">@color/your_onPrimary</item>
+    </style>
+</resources>

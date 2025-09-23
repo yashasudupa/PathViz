@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary theme colors -->
+    <color name="your_primary">#6200EE</color>
+    <color name="your_onPrimary">#FFFFFF</color>
+
+    <!-- Additional common colors (adjust to your brand) -->
+    <color name="your_secondary">#03DAC6</color>
+    <color name="your_onSecondary">#000000</color>
+    <color name="your_background">#FFFFFF</color>
+    <color name="your_onBackground">#000000</color>
+    <color name="your_surface">#FFFFFF</color>
+    <color name="your_onSurface">#000000</color>
+    <color name="your_error">#B00020</color>
+    <color name="your_onError">#FFFFFF</color>
+</resources>
