@@ -8,7 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.urbansetu.app.hotspots.HotspotsScreen
-import com.urbansetu.app.map.MapScreen
+import com.urbansetu.app.map.MapScreenWith3DSim
 import com.urbansetu.app.petition.PetitionScreen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -53,7 +53,7 @@ fun NavGraph(nav: NavHostController) {
       startDestination = Route.Map.r,
       modifier = Modifier.padding(paddingValues)
     ) {
-      composable(Route.Map.r) { MapScreen() }
+      composable(Route.Map.r) { MapScreenWith3DSim() }
       composable(Route.Hotspots.r) { HotspotsScreen() }
       composable(Route.Petition.r) { PetitionScreen() }
     }
