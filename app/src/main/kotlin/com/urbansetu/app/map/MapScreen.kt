@@ -105,21 +105,52 @@ private fun generateGridPaths(center: LatLng, radiusMeters: Double, spacingMeter
 }
 
 // create a simple building bitmap
-private fun makeBuildingBitmap(widthPx: Int, heightPx: Int, color: Int): Bitmap {
+private fun makeBuildingBitmap3D(widthPx: Int, heightPx: Int, color: Int): Bitmap {
     val bmp = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
     val c = Canvas(bmp)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    // base color
     paint.style = Paint.Style.FILL
     paint.color = color
     c.drawRect(0f, 0f, widthPx.toFloat(), heightPx.toFloat() * 0.7f, paint)
-    paint.color = (color and 0x00FFFFFF) or (0x66000000.toInt() and -0x1000000)
-    c.drawRect(widthPx*0.75f, heightPx*0.1f, widthPx.toFloat(), heightPx.toFloat(), paint)
+
+    // lighter top for 3D effect
+    paint.color = lightenColor(color, 0.3f)
+    val topHeight = heightPx * 0.2f
+    c.drawRect(0f, 0f, widthPx.toFloat(), topHeight, paint)
+
+    // darker side
+    paint.color = darkenColor(color, 0.4f)
+    c.drawRect(widthPx * 0.75f, topHeight, widthPx.toFloat(), heightPx.toFloat(), paint)
+
+    // shadow
+    paint.color = 0x55000000
+    c.drawRect(widthPx * 0.05f, heightPx * 0.7f, widthPx.toFloat(), heightPx.toFloat(), paint)
+
+    // outline
     paint.style = Paint.Style.STROKE
     paint.color = 0xFF000000.toInt()
     paint.strokeWidth = 2f
     c.drawRect(0f, 0f, widthPx.toFloat(), heightPx.toFloat() * 0.7f, paint)
+
     return bmp
 }
+
+private fun lightenColor(color: Int, factor: Float): Int {
+    val r = ((color shr 16 and 0xFF) + (255 - (color shr 16 and 0xFF)) * factor).toInt()
+    val g = ((color shr 8 and 0xFF) + (255 - (color shr 8 and 0xFF)) * factor).toInt()
+    val b = ((color and 0xFF) + (255 - (color and 0xFF)) * factor).toInt()
+    return (color and -0x1000000) or (r shl 16) or (g shl 8) or b
+}
+
+private fun darkenColor(color: Int, factor: Float): Int {
+    val r = ((color shr 16 and 0xFF) * (1 - factor)).toInt()
+    val g = ((color shr 8 and 0xFF) * (1 - factor)).toInt()
+    val b = ((color and 0xFF) * (1 - factor)).toInt()
+    return (color and -0x1000000) or (r shl 16) or (g shl 8) or b
+}
+
 
 // create litter bitmap
 private fun makeLitterBitmap(sizePx: Int, color: Int): Bitmap {
@@ -157,8 +188,9 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
     var runningNavigation by remember { mutableStateOf(false) }
     val navPath = remember { mutableStateListOf<LatLng>() }
 
-    val buildingBmp = remember { makeBuildingBitmap(80, 120, 0xFF8B4513.toInt()) }
-    val litterBmp = remember { makeLitterBitmap(40, 0xFFFFA500.toInt()) }
+    // <-- FIX: explicitly type Bitmaps and use the 3D factory name you defined
+    val buildingBmp: Bitmap = remember { makeBuildingBitmap3D(80, 120, 0xFF8B4513.toInt()) }
+    val litterBmp: Bitmap = remember { makeLitterBitmap(40, 0xFFFFA500.toInt()) }
 
     var infoText by remember { mutableStateOf("Long-press map to select area center") }
 
@@ -182,7 +214,7 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
                         .tilt(55f)
                         .bearing(bearing)
                         .build()
-                    delay(stepDelay)
+                    kotlinx.coroutines.delay(stepDelay)
                 }
             }
             navPath.reverse()
@@ -193,8 +225,11 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
         modifier = modifier,
         cameraPositionState = cameraPositionState,
         onMapLongClick = { latlng ->
-            selectionCenter = latlng
+            // quick immediate UI feedback so we know handler ran
+            infoText = "Generating area at ${"%.5f".format(latlng.latitude)}, ${"%.5f".format(latlng.longitude)}..."
+            println("onMapLongClick: $latlng")
 
+            // generate map content synchronously (fast)
             val radius = selectionRadius
             val spacing = 40.0
             val newStreets = generateGridPaths(latlng, radius, spacing)
@@ -213,10 +248,10 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
 
             litter.clear()
             for (line in newStreets) {
-                for (i in 0 until line.size-1) {
+                for (i in 0 until line.size - 1) {
                     if (rng.nextFloat() < 0.06f) {
                         val t = rng.nextDouble()
-                        litter.add(lerpLatLng(line[i], line[i+1], t))
+                        litter.add(lerpLatLng(line[i], line[i + 1], t))
                     }
                 }
             }
@@ -224,13 +259,27 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
             navPath.clear()
             if (streets.isNotEmpty()) navPath.addAll(streets.first())
 
+            selectionCenter = latlng
             infoText = "Area selected: ${"%.0f".format(radius)}m radius. Streets: ${streets.size}, buildings: ${buildings.size}, litter: ${litter.size}"
         }
     ) {
+        // draw streets
         streets.forEach { Polyline(points = it, width = 6f) }
+
+        // buildings with perspective (distance + height)
         buildings.forEach { (pos, hIdx) ->
-            val scale = 0.6f + hIdx*0.5f
-            val bmp = Bitmap.createScaledBitmap(buildingBmp, (buildingBmp.width*scale).toInt(), (buildingBmp.height*scale).toInt(), true)
+            val distance = haversineMeters(
+                cameraPositionState.position.target.latitude,
+                cameraPositionState.position.target.longitude,
+                pos.latitude, pos.longitude
+            )
+            // base scale from height, then mod by distance (tweak constants to taste)
+            val baseScale = 0.5f + hIdx * 0.5f
+            val distFactor = 200f / max(50f, distance.toFloat()) // closer => bigger
+            val scale = (baseScale * distFactor).coerceIn(0.3f, 1.8f)
+            val w = (buildingBmp.width * scale).toInt().coerceAtLeast(8)
+            val h = (buildingBmp.height * scale).toInt().coerceAtLeast(8)
+            val bmp = Bitmap.createScaledBitmap(buildingBmp, w, h, true)
             Marker(
                 state = MarkerState(position = pos),
                 title = "Building",
@@ -239,19 +288,31 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
                 zIndex = 1f
             )
         }
+
+        // litter with perspective scaling based on distance
         litter.forEach { lt ->
+            val distance = haversineMeters(
+                cameraPositionState.position.target.latitude,
+                cameraPositionState.position.target.longitude,
+                lt.latitude, lt.longitude
+            )
+            val scale = (0.4f + 0.6f * max(0.2f, 500f / max(1f, distance.toFloat()))).coerceIn(0.25f, 1f)
+            val s = (litterBmp.width * scale).toInt().coerceAtLeast(6)
+            val bmp = Bitmap.createScaledBitmap(litterBmp, s, s, true)
             Marker(
                 state = MarkerState(position = lt),
                 title = "Litter",
                 snippet = "please cleanup",
-                icon = BitmapDescriptorFactory.fromBitmap(litterBmp),
+                icon = BitmapDescriptorFactory.fromBitmap(bmp),
                 zIndex = 2f
             )
         }
+
         if (navPath.isNotEmpty()) {
             Polyline(points = navPath, width = 10f)
             Marker(state = MarkerState(position = movingPos.value), title = "Navigator")
         }
+
         selectionCenter?.let { c ->
             Circle(center = c, radius = selectionRadius, strokeWidth = 2f)
         }
