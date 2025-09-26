@@ -1,27 +1,38 @@
 package com.urbansetu.app.map
+import androidx.compose.ui.geometry.Offset
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.core.net.toFile
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
 import kotlin.math.*
 import kotlin.random.Random
-import kotlinx.coroutines.delay
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.zIndex
 
 // ---------- Utility: convert meters to degrees approx ----------
 private fun metersToDegreesLat(meters: Double) = meters / 111_111.0
@@ -32,8 +43,8 @@ private fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Doub
     val R = 6371000.0
     val dLat = Math.toRadians(lat2 - lat1)
     val dLon = Math.toRadians(lon2 - lon1)
-    val a = sin(dLat/2).pow(2.0) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon/2).pow(2.0)
-    val c = 2 * atan2(sqrt(a), sqrt(1-a))
+    val a = sin(dLat / 2).pow(2.0) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2.0)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 }
 
@@ -151,7 +162,6 @@ private fun darkenColor(color: Int, factor: Float): Int {
     return (color and -0x1000000) or (r shl 16) or (g shl 8) or b
 }
 
-
 // create litter bitmap
 private fun makeLitterBitmap(sizePx: Int, color: Int): Bitmap {
     val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
@@ -159,14 +169,58 @@ private fun makeLitterBitmap(sizePx: Int, color: Int): Bitmap {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     paint.style = Paint.Style.FILL
     paint.color = color
-    c.drawOval(RectF(sizePx*0.15f, sizePx*0.2f, sizePx*0.85f, sizePx*0.7f), paint)
+    c.drawOval(RectF(sizePx * 0.15f, sizePx * 0.2f, sizePx * 0.85f, sizePx * 0.7f), paint)
     paint.color = 0xFF444444.toInt()
-    c.drawRect(sizePx*0.35f, sizePx*0.7f, sizePx*0.65f, sizePx*0.9f, paint)
+    c.drawRect(sizePx * 0.35f, sizePx * 0.7f, sizePx * 0.65f, sizePx * 0.9f, paint)
     return bmp
 }
 
+// --- Vehicles and recommendations ---
+
+data class Vehicle(
+    val id: String,
+    var position: LatLng,
+    var heading: Float,
+    var speedMps: Float,
+    val type: String // "Taxi","Auto","Bus","Car"
+)
+
+sealed class Recommendation {
+    data class EcoTask(
+        val id: String,
+        val title: String,
+        val description: String,
+        val rewardPoints: Int
+    ) : Recommendation()
+
+    data class AwarenessUpload(
+        val id: String,
+        val title: String,
+        val description: String
+    ) : Recommendation()
+
+    data class DriverCheck(
+        val id: String,
+        val vehicleType: String,
+        val description: String,
+        val rewardPoints: Int
+    ) : Recommendation()
+}
+
+// Helpers from before
+fun approxTrafficForSlot(slot: String): String {
+    return when (slot) {
+        "Early Morning" -> "low"
+        "Morning Peak" -> "high"
+        "Noon" -> "medium"
+        "Evening Peak" -> "high"
+        "Night" -> "low"
+        else -> "normal"
+    }
+}
+
 @Composable
-fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
+fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
     val context = LocalContext.current
     val density = LocalDensity.current
 
@@ -175,7 +229,12 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
         position = CameraPosition.fromLatLngZoom(LatLng(12.9716, 77.5946), 15f)
     }
 
-    // user selection
+    // selection + double-tap detection
+    var lastTapTime by remember { mutableStateOf(0L) }
+    var lastTapPos by remember { mutableStateOf<LatLng?>(null) }
+    val doubleTapThreshold = 350L // ms
+    val doubleTapDistanceMeters = 30.0
+
     var selectionCenter by remember { mutableStateOf<LatLng?>(null) }
     var selectionRadius by remember { mutableStateOf(200.0) }
 
@@ -184,18 +243,194 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
     val buildings = remember { mutableStateListOf<Pair<LatLng, Int>>() }
     val litter = remember { mutableStateListOf<LatLng>() }
 
+    // vehicles
+    val vehicles = remember { mutableStateListOf<Vehicle>() }
+
     // UI controls
     var runningNavigation by remember { mutableStateOf(false) }
     val navPath = remember { mutableStateListOf<LatLng>() }
 
-    // <-- FIX: explicitly type Bitmaps and use the 3D factory name you defined
     val buildingBmp: Bitmap = remember { makeBuildingBitmap3D(80, 120, 0xFF8B4513.toInt()) }
     val litterBmp: Bitmap = remember { makeLitterBitmap(40, 0xFFFFA500.toInt()) }
 
-    var infoText by remember { mutableStateOf("Long-press map to select area center") }
-
+    var infoText by remember { mutableStateOf("Double-tap map to create recommendations for that street section") }
     val movingPos = remember { mutableStateOf(LatLng(0.0, 0.0)) }
 
+    // Rewards
+    var userPoints by remember { mutableStateOf(0) }
+    val completedTasks = remember { mutableStateListOf<String>() }
+
+    // Recommendations local to selected street section
+    val localRecommendations = remember { mutableStateListOf<Recommendation>() }
+
+    // Time slot + traffic prediction
+    var selectedTimeSlot by remember { mutableStateOf("Now") }
+    var trafficPredictionText by remember { mutableStateOf("Traffic: normal") }
+
+    // Dialog state for explanations
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogTitle by remember { mutableStateOf("") }
+    var dialogMessage by remember { mutableStateOf("") }
+
+    // Image upload (awareness only)
+    var uploadedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uploadedImageUri = uri
+    }
+
+    // --- Heuristic helpers for street-level "usual" traffic and cleanliness ---
+    fun streetVehicleCount(street: List<LatLng>): Int {
+        // count vehicles within ~40m of any point on the street
+        var cnt = 0
+        for (v in vehicles) {
+            for (i in 0 until street.size - 1) {
+                val mid = lerpLatLng(street[i], street[i + 1], 0.5)
+                val d = haversineMeters(v.position.latitude, v.position.longitude, mid.latitude, mid.longitude)
+                if (d < 40.0) { cnt++; break }
+            }
+        }
+        return cnt
+    }
+
+    fun streetLitterDensity(street: List<LatLng>): Double {
+        // number of litter items per 100 meters of street length
+        var hits = 0
+        var lengthMeters = 0.0
+        for (i in 0 until street.size - 1) {
+            val a = street[i]; val b = street[i+1]
+            lengthMeters += haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude)
+            val mid = lerpLatLng(a, b, 0.5)
+            for (lt in litter) {
+                val d = haversineMeters(lt.latitude, lt.longitude, mid.latitude, mid.longitude)
+                if (d < 30.0) { hits++ }
+            }
+        }
+        if (lengthMeters <= 0.0) return 0.0
+        return hits / (lengthMeters / 100.0)
+    }
+
+    fun heuristicTrafficLevelForStreet(street: List<LatLng>): String {
+        // simple heuristic combining vehicle count and time-slot expectation
+        val cnt = streetVehicleCount(street)
+        val base = approxTrafficForSlot(selectedTimeSlot) // low/medium/high/normal
+        // amplify based on local vehicle count
+        return when {
+            cnt >= 8 -> "high"
+            cnt >= 4 -> if (base == "low") "medium" else base
+            cnt >= 1 -> if (base == "high") "high" else base
+            else -> base
+        }
+    }
+
+    fun explanationForSlotAndStreet(slot: String, street: List<LatLng>?): String {
+        val base = approxTrafficForSlot(slot)
+        val sb = StringBuilder()
+        sb.append("Time slot: $slot -> typical traffic: $base. ")
+        if (street != null) {
+            val vCnt = streetVehicleCount(street)
+            val litterD = streetLitterDensity(street)
+            sb.append("This street currently has ~$vCnt vehicles nearby and litter density ${"%.2f".format(litterD)} items/100m. ")
+            val finalLevel = heuristicTrafficLevelForStreet(street)
+            sb.append("Heuristic traffic level for this street: $finalLevel. ")
+            // actionable advice
+            when (finalLevel) {
+                "low" -> sb.append("Good time to travel — expect faster trips and lower emissions.")
+                "medium" -> sb.append("Moderate traffic — consider off-peak or public transit for longer trips.")
+                "high" -> sb.append("Heavy traffic — shifting your commute or taking public transit will likely save time and emissions.")
+                else -> sb.append("Choose an off-peak slot to reduce congestion and emissions.")
+            }
+        } else {
+            sb.append("Choose off-peak to reduce congestion.")
+        }
+        return sb.toString()
+    }
+
+    fun explanationForRouteChangeCompared(current: List<LatLng>?, candidate: List<LatLng>): String {
+        val curVehicles = current?.let { streetVehicleCount(it) } ?: 0
+        val candVehicles = streetVehicleCount(candidate)
+        val curLitter = current?.let { streetLitterDensity(it) } ?: 0.0
+        val candLitter = streetLitterDensity(candidate)
+        val sb = StringBuilder()
+        sb.append("Alternate route recommendation:\n")
+        sb.append("- Current: vehicles=$curVehicles, litter=${"%.2f".format(curLitter)} per100m.\n")
+        sb.append("- Alternate: vehicles=$candVehicles, litter=${"%.2f".format(candLitter)} per100m.\n")
+
+        if (candVehicles < curVehicles) {
+            sb.append("Alternate route has fewer vehicles — likely faster and less idling.")
+        } else {
+            sb.append("Alternate route has similar vehicle count.")
+        }
+        sb.append(" ")
+
+        if (candLitter < curLitter) {
+            sb.append("Also cleaner — better for walkability and health.")
+        }
+        return sb.toString()
+    }
+
+    fun applyTrafficToVehicles(level: String) {
+        when (level) {
+            "low" -> vehicles.forEach { it.speedMps = (8..12).random().toFloat() }
+            "medium" -> vehicles.forEach { it.speedMps = (5..9).random().toFloat() }
+            "high" -> {
+                if (vehicles.size < 8) {
+                    val toAdd = 8 - vehicles.size
+                    val rng = Random(System.currentTimeMillis())
+                    repeat(toAdd) {
+                        val v = Vehicle(
+                            id = "v${System.nanoTime()}",
+                            position = LatLng(12.9716 + rng.nextDouble(-0.003, 0.003), 77.5946 + rng.nextDouble(-0.003, 0.003)),
+                            heading = rng.nextFloat() * 360f,
+                            speedMps = (2..5).random().toFloat(),
+                            type = listOf("Taxi", "Auto", "Bus", "Car").random()
+                        )
+                        vehicles.add(v)
+                    }
+                }
+                vehicles.forEach { it.speedMps = (2..5).random().toFloat() }
+            }
+            else -> vehicles.forEach { it.speedMps = (5..10).random().toFloat() }
+        }
+    }
+
+    // spawn vehicles along a given street polyline
+    fun spawnVehiclesOnStreet(street: List<LatLng>, count: Int) {
+        val rng = Random(System.currentTimeMillis())
+        if (street.isEmpty()) return
+        repeat(count) {
+            val idx = rng.nextInt(0, max(1, street.size - 1))
+            val t = rng.nextDouble()
+            val pos = lerpLatLng(street[idx], street[min(idx + 1, street.size - 1)], t)
+            val heading = computeBearing(street[idx], street[min(idx + 1, street.size - 1)])
+            val v = Vehicle(
+                id = "v${System.nanoTime()}",
+                position = pos,
+                heading = heading,
+                speedMps = (4..10).random().toFloat(),
+                type = listOf("Taxi", "Auto", "Bus", "Car").random()
+            )
+            vehicles.add(v)
+        }
+    }
+
+    // move vehicles loop
+    LaunchedEffect(Unit) {
+        while (true) {
+            val dtSeconds = 0.8f
+            val rng = Random(System.currentTimeMillis())
+            for (i in vehicles.indices) {
+                val v = vehicles[i]
+                val distMeters = v.speedMps * dtSeconds
+                val dLat = metersToDegreesLat(distMeters * cos(Math.toRadians(v.heading.toDouble())))
+                val dLng = metersToDegreesLng(distMeters * sin(Math.toRadians(v.heading.toDouble())), v.position.latitude)
+                v.position = LatLng(v.position.latitude + dLat, v.position.longitude + dLng)
+                if (rng.nextFloat() < 0.08f) v.heading = (v.heading + rng.nextFloat() * 60f - 30f) % 360f
+            }
+            delay(700L)
+        }
+    }
+
+    // navigation movement coroutine
     LaunchedEffect(runningNavigation, navPath) {
         if (!runningNavigation || navPath.size < 2) return@LaunchedEffect
         while (runningNavigation) {
@@ -207,14 +442,15 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
                 val stepDelay = 50L
                 for (s in 1..steps) {
                     val t = s / steps.toDouble()
-                    movingPos.value = lerpLatLng(a, b, t)
+                    // update camera
+                    val moving = lerpLatLng(a, b, t)
                     cameraPositionState.position = CameraPosition.builder()
-                        .target(movingPos.value)
+                        .target(moving)
                         .zoom(18f)
                         .tilt(55f)
                         .bearing(bearing)
                         .build()
-                    kotlinx.coroutines.delay(stepDelay)
+                    delay(stepDelay)
                 }
             }
             navPath.reverse()
@@ -225,11 +461,7 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
         modifier = modifier,
         cameraPositionState = cameraPositionState,
         onMapLongClick = { latlng ->
-            // quick immediate UI feedback so we know handler ran
             infoText = "Generating area at ${"%.5f".format(latlng.latitude)}, ${"%.5f".format(latlng.longitude)}..."
-            println("onMapLongClick: $latlng")
-
-            // generate map content synchronously (fast)
             val radius = selectionRadius
             val spacing = 40.0
             val newStreets = generateGridPaths(latlng, radius, spacing)
@@ -260,22 +492,100 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
             if (streets.isNotEmpty()) navPath.addAll(streets.first())
 
             selectionCenter = latlng
-            infoText = "Area selected: ${"%.0f".format(radius)}m radius. Streets: ${streets.size}, buildings: ${buildings.size}, litter: ${litter.size}"
+            infoText = "Area selected: ${"%.0f".format(radius)}m radius. Streets: ${streets.size}, buildings: ${buildings.size}, litter: ${litter.size}. Double-tap a street to get recommendations."
+
+            // initial vehicle spawn
+            vehicles.clear()
+            if (streets.isNotEmpty()) spawnVehiclesOnStreet(streets.first(), 5)
+            applyTrafficToVehicles(approxTrafficForSlot(selectedTimeSlot))
+        },
+        onMapClick = { latlng ->
+            val now = System.currentTimeMillis()
+            val prev = lastTapTime
+            val prevPos = lastTapPos
+            if (now - prev <= doubleTapThreshold && prevPos != null) {
+                val d = haversineMeters(prevPos.latitude, prevPos.longitude, latlng.latitude, latlng.longitude)
+                if (d <= doubleTapDistanceMeters) {
+                    // double-tap
+                    var bestStreet: List<LatLng>? = null
+                    var bestDist = Double.MAX_VALUE
+                    var bestIndex = -1
+                    for (si in streets.indices) {
+                        val line = streets[si]
+                        for (i in 0 until line.size - 1) {
+                            val mid = lerpLatLng(line[i], line[i + 1], 0.5)
+                            val dd = haversineMeters(latlng.latitude, latlng.longitude, mid.latitude, mid.longitude)
+                            if (dd < bestDist) {
+                                bestDist = dd
+                                bestStreet = line
+                                bestIndex = si
+                            }
+                        }
+                    }
+                    if (bestStreet != null && bestDist < 80.0) {
+                        localRecommendations.clear()
+                        localRecommendations.add(
+                            Recommendation.EcoTask(
+                                id = "commute_offpeak_${bestIndex}",
+                                title = "Shift commute off-peak (this street)",
+                                description = "Reduce congestion on this stretch by choosing an off-peak slot.",
+                                rewardPoints = 6
+                            )
+                        )
+                        localRecommendations.add(
+                            Recommendation.DriverCheck(
+                                id = "driver_taxi_check_${bestIndex}",
+                                vehicleType = "Taxi",
+                                description = "Encourage taxi drivers on this street to keep vehicles clean.",
+                                rewardPoints = 10
+                            )
+                        )
+                        localRecommendations.add(
+                            Recommendation.AwarenessUpload(
+                                id = "upload_awareness_${bestIndex}",
+                                title = "Upload cleanliness photo (awareness)",
+                                description = "Help raise awareness for this street (no reward)."
+                            )
+                        )
+
+                        // spawn vehicles on that street
+                        vehicles.clear()
+                        spawnVehiclesOnStreet(bestStreet, 6)
+
+                        // create navPath sample
+                        navPath.clear()
+                        val sample = bestStreet
+                        for (i in 0 until sample.size step max(1, sample.size / 6)) navPath.add(sample[i])
+
+                        infoText = "Recommendations generated for the selected street (dist ${bestDist.toInt()}m)."
+
+                    } else {
+                        infoText = "Double-tap detected but no nearby street segment found."
+                    }
+                    lastTapTime = 0L
+                    lastTapPos = null
+                } else {
+                    lastTapTime = now
+                    lastTapPos = latlng
+                }
+            } else {
+                lastTapTime = now
+                lastTapPos = latlng
+            }
         }
     ) {
         // draw streets
         streets.forEach { Polyline(points = it, width = 6f) }
 
-        // buildings with perspective (distance + height)
+        // buildings
         buildings.forEach { (pos, hIdx) ->
             val distance = haversineMeters(
                 cameraPositionState.position.target.latitude,
                 cameraPositionState.position.target.longitude,
                 pos.latitude, pos.longitude
             )
-            // base scale from height, then mod by distance (tweak constants to taste)
             val baseScale = 0.5f + hIdx * 0.5f
-            val distFactor = 200f / max(50f, distance.toFloat()) // closer => bigger
+            val distFactor = 200f / max(50f, distance.toFloat())
             val scale = (baseScale * distFactor).coerceIn(0.3f, 1.8f)
             val w = (buildingBmp.width * scale).toInt().coerceAtLeast(8)
             val h = (buildingBmp.height * scale).toInt().coerceAtLeast(8)
@@ -289,7 +599,7 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
             )
         }
 
-        // litter with perspective scaling based on distance
+        // litter
         litter.forEach { lt ->
             val distance = haversineMeters(
                 cameraPositionState.position.target.latitude,
@@ -308,9 +618,23 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
             )
         }
 
+        // vehicles
+        vehicles.forEach { v ->
+            val ico = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+            Marker(
+                state = MarkerState(position = v.position),
+                title = v.type,
+                snippet = "${"%.1f".format(v.speedMps)} m/s",
+                icon = ico,
+                rotation = v.heading,
+                anchor = Offset(0.5f, 0.5f),
+                zIndex = 3f
+            )
+        }
+
         if (navPath.isNotEmpty()) {
             Polyline(points = navPath, width = 10f)
-            Marker(state = MarkerState(position = movingPos.value), title = "Navigator")
+            Marker(state = MarkerState(position = cameraPositionState.position.target), title = "Navigator")
         }
 
         selectionCenter?.let { c ->
@@ -318,25 +642,191 @@ fun MapScreenWith3DSim(modifier: Modifier = Modifier.fillMaxSize()) {
         }
     }
 
+    // Floating UI panel with recommendations and controls
     Column(
         modifier = Modifier
             .padding(12.dp)
             .zIndex(10f)
     ) {
-        androidx.compose.material3.Card {
+        Card(shape = RoundedCornerShape(8.dp)) {
             Column(modifier = Modifier.padding(8.dp)) {
-                Text(infoText)
+                Text(text = infoText)
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Row {
                     Button(onClick = { runningNavigation = !runningNavigation }) {
                         Text(if (runningNavigation) "Stop nav" else "Start nav")
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
                         selectionCenter = null
                         streets.clear(); buildings.clear(); litter.clear(); navPath.clear()
+                        localRecommendations.clear(); uploadedImageUri = null; vehicles.clear()
                         infoText = "Cleared"
                     }) { Text("Clear") }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // time slot selection
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    listOf("Early Morning", "Morning Peak", "Noon", "Evening Peak", "Night", "Now").forEach { slot ->
+                        Button(onClick = {
+                            selectedTimeSlot = slot
+                            val level = approxTrafficForSlot(slot)
+                            trafficPredictionText = "Traffic: $level"
+                            applyTrafficToVehicles(level)
+                            // show dialog with a heuristic explanation; use current navPath street if available
+                            val currentStreet = if (navPath.size >= 2) listOf(navPath.first(), navPath.last()) else null
+                            // find best matching street from streets (if navPath exists) to compute heuristics
+                            var heuristicStreet: List<LatLng>? = null
+                            if (streets.isNotEmpty()) heuristicStreet = streets.minByOrNull { st ->
+                                // distance from center of navPath to street mid
+                                val pathMid = if (navPath.isNotEmpty()) navPath[navPath.size/2] else LatLng(12.9716,77.5946)
+                                val mids = st[st.size/2]
+                                haversineMeters(pathMid.latitude, pathMid.longitude, mids.latitude, mids.longitude)
+                            }
+                            dialogTitle = "Why choose '$slot'?"
+                            dialogMessage = explanationForSlotAndStreet(slot, heuristicStreet)
+                            showDialog = true
+                        }, modifier = Modifier.padding(4.dp)) {
+                            Text(slot.take(6))
+                        }
+                    }
+                }
+
+                Text(trafficPredictionText, modifier = Modifier.padding(4.dp))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // show current points
+                Text("Your points: $userPoints", modifier = Modifier.padding(4.dp))
+
+                // Show uploaded image (awareness) info
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Button(onClick = { imagePicker.launch("image/*") }) {
+                        Text("Upload awareness image (no reward)")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    if (uploadedImageUri != null) {
+                        Text(text = "Image uploaded: ${uploadedImageUri.toString()}")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Recommendations local to a double-tapped street
+                if (localRecommendations.isEmpty()) {
+                    Text("Double-tap a street to view recommendations for that street segment.")
+                } else {
+                    localRecommendations.forEach { rec ->
+                        when (rec) {
+                            is Recommendation.EcoTask -> {
+                                Card(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)) {
+                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(rec.title, style = MaterialTheme.typography.titleMedium)
+                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(onClick = {
+                                            if (!completedTasks.contains(rec.id)) {
+                                                completedTasks.add(rec.id)
+                                                userPoints += rec.rewardPoints
+                                                // pick an alternate street and compare heuristics
+                                                if (streets.size > 1) {
+                                                    val rng = Random(System.currentTimeMillis())
+                                                    val pick = streets[rng.nextInt(streets.size)]
+                                                    val currentStreet = if (navPath.size >= 2) {
+                                                        // try to find a street that matches navPath endpoints
+                                                        streets.minByOrNull { st ->
+                                                            val d1 = haversineMeters(navPath.first().latitude, navPath.first().longitude, st[0].latitude, st[0].longitude)
+                                                            val d2 = haversineMeters(navPath.last().latitude, navPath.last().longitude, st[st.size-1].latitude, st[st.size-1].longitude)
+                                                            d1 + d2
+                                                        }
+                                                    } else null
+
+                                                    navPath.clear();
+                                                    for (i in 0 until pick.size step max(1, pick.size / 6)) navPath.add(pick[i])
+                                                    // new litter and vehicles
+                                                    litter.clear(); vehicles.clear()
+                                                    val r2 = Random(System.currentTimeMillis())
+                                                    for (line in streets) {
+                                                        for (i in 0 until line.size - 1) if (r2.nextFloat() < 0.05f) {
+                                                            litter.add(lerpLatLng(line[i], line[i + 1], r2.nextDouble()))
+                                                        }
+                                                    }
+                                                    spawnVehiclesOnStreet(pick, 6)
+                                                    infoText = "Followed '${rec.title}'. Switching to alternate route and updating vehicles/litter."
+                                                    // show explanation comparing current vs candidate
+                                                    dialogTitle = "Why this route?"
+                                                    dialogMessage = explanationForRouteChangeCompared(currentStreet, pick)
+                                                    showDialog = true
+                                                }
+                                            }
+                                        }) {
+                                            Text("Claim +${rec.rewardPoints}")
+                                        }
+                                    }
+                                }
+                            }
+
+                            is Recommendation.AwarenessUpload -> {
+                                Card(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)) {
+                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(rec.title, style = MaterialTheme.typography.titleMedium)
+                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(onClick = { imagePicker.launch("image/*") }) { Text("Upload") }
+                                    }
+                                }
+                            }
+
+                            is Recommendation.DriverCheck -> {
+                                Card(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)) {
+                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text("Driver cleanliness: ${rec.vehicleType}", style = MaterialTheme.typography.titleMedium)
+                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(onClick = {
+                                            if (!completedTasks.contains(rec.id)) {
+                                                completedTasks.add(rec.id)
+                                                userPoints += rec.rewardPoints
+                                                // small cleanup effect
+                                                val removed = min(litter.size, 3)
+                                                repeat(removed) { if (litter.isNotEmpty()) litter.removeAt(0) }
+                                                infoText = "Driver verified. Awarded ${rec.rewardPoints} points and cleaned some litter."
+                                                // show explanation why driver cleanliness matters here
+                                                dialogTitle = "Why verify driver cleanliness?"
+                                                dialogMessage = "Cleaner vehicles reduce local trash and improve passenger comfort; drivers who keep vehicles clean help make the route safer and healthier for everyone."
+                                                showDialog = true
+                                            }
+                                        }) { Text("Verify +${rec.rewardPoints}") }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
+    }
+
+    // Dialog UI
+    if (showDialog) {
+        AlertDialog(onDismissRequest = { showDialog = false }, confirmButton = {
+            Button(onClick = { showDialog = false }) { Text("OK") }
+        }, title = { Text(dialogTitle) }, text = { Text(dialogMessage) })
     }
 }
