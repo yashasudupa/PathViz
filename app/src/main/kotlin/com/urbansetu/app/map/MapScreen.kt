@@ -11,16 +11,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -33,6 +29,224 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
 import kotlin.math.*
 import kotlin.random.Random
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip            // <<--- the missing import
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.dp
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.MoreVert
+// animation imports
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilterChip
+// Compose core / foundation / layout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+// Compose animation
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+
+// Compose UI (draw, graphics, alignment, units)
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow      // <-- correct import for shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+
+// Material3
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+
+// Icons
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Upload
+
+
+
+fun generateTimeslots(): List<String> {
+    val fmt = DateTimeFormatter.ofPattern("h:mm a")
+    return (0..23).map { hour -> LocalTime.of(hour, 0).format(fmt) }
+}
+
+@Composable
+fun MapTopActionIcon(
+    timeslots: List<String> = generateTimeslots(),
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 48.dp,
+    onUploadClicked: () -> Unit,
+    onTimeslotSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .padding(12.dp)
+            .wrapContentSize()
+            .zIndex(20f),
+        horizontalAlignment = Alignment.End
+    ) {
+        IconButton(
+            onClick = { expanded = !expanded },
+            modifier = Modifier
+                .size(iconSize)
+                .clip(CircleShape)
+                .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = if (expanded) "Close menu" else "Open menu",
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // animated popup card
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+        ) {
+            Card(
+                modifier = Modifier
+                    .widthIn(max = 320.dp)
+                    .wrapContentHeight()
+                    .shadow(8.dp, RoundedCornerShape(12.dp)),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    // Upload row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onUploadClicked()
+                                expanded = false
+                            }
+                            .padding(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.secondary),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Upload,
+                                contentDescription = "Upload awareness image",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Upload awareness image", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    Divider(modifier = Modifier.padding(vertical = 6.dp))
+
+                    // Timeslot chips (horizontally scrollable)
+                    Text("Select timeslot", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 6.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        timeslots.forEach { ts ->
+                            FilterChip(
+                                selected = false,
+                                onClick = {
+                                    onTimeslotSelected(ts)
+                                    expanded = false
+                                },
+                                label = { Text(ts) },
+                                modifier = Modifier.height(36.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Simple heuristic mapping from an hour (0..23) to a traffic level.
+ * - Morning peak: 8-10 -> "high"
+ * - Evening peak: 17-19 -> "high"
+ * - Late night: 0-5 -> "low"
+ * - Midday: 11-15 -> "medium"
+ * - otherwise -> "normal"
+ */
+fun approxTrafficForTime(timeslot: String): String {
+    return try {
+        val parsed = java.time.format.DateTimeFormatter.ofPattern("h:mm a").let { fmt ->
+            java.time.LocalTime.parse(timeslot, fmt)
+        }
+        val h = parsed.hour
+        when (h) {
+            in 8..10 -> "high"
+            in 17..19 -> "high"
+            in 0..5 -> "low"
+            in 11..15 -> "medium"
+            else -> "normal"
+        }
+    } catch (e: Exception) {
+        "normal"
+    }
+}
 
 // ---------- Utility: convert meters to degrees approx ----------
 private fun metersToDegreesLat(meters: Double) = meters / 111_111.0
@@ -458,7 +672,7 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
     }
 
     GoogleMap(
-        modifier = modifier,
+        modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         onMapLongClick = { latlng ->
             infoText = "Generating area at ${"%.5f".format(latlng.latitude)}, ${"%.5f".format(latlng.longitude)}..."
@@ -642,11 +856,40 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         }
     }
 
+    // --- put this right AFTER the GoogleMap(...) { ... } block and BEFORE your floating Column ---
+    MapTopActionIcon(
+        modifier = Modifier.padding(12.dp), // positions it away from the edge
+        timeslots = generateTimeslots(),
+        onUploadClicked = {
+            // use the existing imagePicker you already defined in this composable
+            imagePicker.launch("image/*")
+        },
+        onTimeslotSelected = { timeslot ->
+            // update your existing states (selectedTimeSlot, trafficPredictionText, applyTrafficToVehicles, and show dialog)
+            selectedTimeSlot = timeslot
+            val level = approxTrafficForTime(timeslot)
+            trafficPredictionText = "Traffic: $level"
+            applyTrafficToVehicles(level)
+
+            // pick a heuristic street (re-using logic you already have)
+            var heuristicStreet: List<LatLng>? = null
+            if (streets.isNotEmpty()) {
+                val pathMid = if (navPath.isNotEmpty()) navPath[navPath.size / 2] else cameraPositionState.position.target
+                heuristicStreet = streets.minByOrNull { st ->
+                    val mids = st[st.size / 2]
+                    haversineMeters(pathMid.latitude, pathMid.longitude, mids.latitude, mids.longitude)
+                }
+            }
+
+            dialogTitle = "Time: $timeslot"
+            dialogMessage = explanationForSlotAndStreet(timeslot, heuristicStreet)
+            showDialog = true
+        }
+    )
+
     // Floating UI panel with recommendations and controls
     Column(
-        modifier = Modifier
-            .padding(12.dp)
-            .zIndex(10f)
+        modifier = Modifier.padding(12.dp).zIndex(10f)
     ) {
         Card(shape = RoundedCornerShape(8.dp)) {
             Column(modifier = Modifier.padding(8.dp)) {
@@ -668,50 +911,12 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // time slot selection
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    listOf("Early Morning", "Morning Peak", "Noon", "Evening Peak", "Night", "Now").forEach { slot ->
-                        Button(onClick = {
-                            selectedTimeSlot = slot
-                            val level = approxTrafficForSlot(slot)
-                            trafficPredictionText = "Traffic: $level"
-                            applyTrafficToVehicles(level)
-                            // show dialog with a heuristic explanation; use current navPath street if available
-                            val currentStreet = if (navPath.size >= 2) listOf(navPath.first(), navPath.last()) else null
-                            // find best matching street from streets (if navPath exists) to compute heuristics
-                            var heuristicStreet: List<LatLng>? = null
-                            if (streets.isNotEmpty()) heuristicStreet = streets.minByOrNull { st ->
-                                // distance from center of navPath to street mid
-                                val pathMid = if (navPath.isNotEmpty()) navPath[navPath.size/2] else LatLng(12.9716,77.5946)
-                                val mids = st[st.size/2]
-                                haversineMeters(pathMid.latitude, pathMid.longitude, mids.latitude, mids.longitude)
-                            }
-                            dialogTitle = "Why choose '$slot'?"
-                            dialogMessage = explanationForSlotAndStreet(slot, heuristicStreet)
-                            showDialog = true
-                        }, modifier = Modifier.padding(4.dp)) {
-                            Text(slot.take(6))
-                        }
-                    }
-                }
-
                 Text(trafficPredictionText, modifier = Modifier.padding(4.dp))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // show current points
                 Text("Your points: $userPoints", modifier = Modifier.padding(4.dp))
-
-                // Show uploaded image (awareness) info
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Button(onClick = { imagePicker.launch("image/*") }) {
-                        Text("Upload awareness image (no reward)")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    if (uploadedImageUri != null) {
-                        Text(text = "Image uploaded: ${uploadedImageUri.toString()}")
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
