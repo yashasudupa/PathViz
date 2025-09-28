@@ -166,6 +166,8 @@ import coil.request.ImageRequest.Builder
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.util.Log
+import androidx.compose.material.icons.filled.Star
+
 
 fun bitmapFromBase64String(dataUri: String): Bitmap? {
     val base64Part = if (dataUri.startsWith("data:")) dataUri.substringAfter(",") else dataUri
@@ -478,9 +480,18 @@ fun MapTopActionIcon(
     modifier: Modifier = Modifier,
     iconSize: Dp = 48.dp,
     onUploadClicked: () -> Unit,
-    onTimeslotSelected: (String) -> Unit
+    onTimeslotSelected: (String) -> Unit,
+    // allow parent to provide and update points/frequencies, or keep internal state if preferred
+    userPointsState: MutableState<Int>? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
+
+    // local monthly frequency state (could be hoisted to parent if you want persistence)
+    var metroFrequency by remember { mutableStateOf(0) }
+    var evFrequency by remember { mutableStateOf(0) }
+
+    // redeem dialog shown from inside the menu
+    var showRedeemDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -506,7 +517,6 @@ fun MapTopActionIcon(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // animated popup card
         AnimatedVisibility(
             visible = expanded,
             enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
@@ -521,7 +531,7 @@ fun MapTopActionIcon(
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
-                    // Upload row
+                    // Upload row (existing)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -552,14 +562,13 @@ fun MapTopActionIcon(
 
                     Divider(modifier = Modifier.padding(vertical = 6.dp))
 
-                    // Timeslot chips (horizontally scrollable)
+                    // Timeslot chips (existing)
                     Text(
                         "Select timeslot",
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 6.dp)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-
                     Row(
                         modifier = Modifier
                             .horizontalScroll(rememberScrollState())
@@ -578,9 +587,97 @@ fun MapTopActionIcon(
                             )
                         }
                     }
+
+                    // ---------- New Metro / EV frequency UI ----------
+                    Divider(modifier = Modifier.padding(vertical = 6.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Metro rides this month: $metroFrequency", style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = { metroFrequency++ }) { Text("+1") }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("EV rides this month: $evFrequency", style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = { evFrequency++ }) { Text("+1") }
+                    }
+
+                    if (metroFrequency >= 10) {
+                        Text("✅ Reward unlocked for Metro usage!", style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (evFrequency >= 5) {
+                        Text("✅ Reward unlocked for EV usage!", style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    Divider(modifier = Modifier.padding(vertical = 6.dp))
+
+                    // Redeem rewards row (opens dialog)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showRedeemDialog = true }
+                            .padding(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Redeem rewards",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Redeem rewards", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
         }
+    }
+
+    // Redeem dialog outside the animated card so it overlays the screen
+    if (showRedeemDialog) {
+        val ctx = LocalContext.current
+        AlertDialog(
+            onDismissRequest = { showRedeemDialog = false },
+            confirmButton = {
+                Button(onClick = { showRedeemDialog = false }) { Text("Close") }
+            },
+            title = { Text("Redeem Rewards") },
+            text = {
+                Column {
+                    Text("Available brand discounts:", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text("🍕 Domino’s: 20% off on orders > ₹400")
+                    Text("👟 Adidas: 15% off selected items")
+                    Text("🎬 BookMyShow: ₹100 cashback on 2 tickets")
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Redeem button (simple demo cost)
+                    Button(onClick = {
+                        val pts = userPointsState?.value ?: 0
+                        if (pts >= 50) {
+                            userPointsState?.value = pts - 50
+                            showRedeemDialog = false
+                            android.widget.Toast.makeText(ctx, "Reward redeemed successfully!", android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            android.widget.Toast.makeText(ctx, "Not enough points!", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Text("Redeem for 50 pts")
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -869,6 +966,14 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
 // upload / processing UI states
     var uploading by remember { mutableStateOf(false) }
     var uploadError by remember { mutableStateOf<String?>(null) }
+
+    // track monthly usage
+    var metroFrequency by remember { mutableStateOf(0) }
+    var evFrequency by remember { mutableStateOf(0) }
+
+// rewards / redeem state
+    var showRedeemDialog by remember { mutableStateOf(false) }
+
 
 // Coroutine scope for launching uploads
     val scope = rememberCoroutineScope()
@@ -1381,40 +1486,71 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
 
     // --- put this right AFTER the GoogleMap(...) { ... } block and BEFORE your floating Column ---
     MapTopActionIcon(
-        modifier = Modifier.padding(12.dp), // positions it away from the edge
+        modifier = Modifier.padding(12.dp),
         timeslots = generateTimeslots(),
-        onUploadClicked = {
-            // use the existing imagePicker you already defined in this composable
-            imagePicker.launch("image/*")
-        },
-        onTimeslotSelected = { timeslot ->
-            // update your existing states (selectedTimeSlot, trafficPredictionText, applyTrafficToVehicles, and show dialog)
+        onUploadClicked = { imagePicker.launch("image/*") },
+        onTimeslotSelected = { timeslot: String ->
             selectedTimeSlot = timeslot
             val level = approxTrafficForTime(timeslot)
             trafficPredictionText = "Traffic: $level"
             applyTrafficToVehicles(level)
-
-            // pick a heuristic street (re-using logic you already have)
-            var heuristicStreet: List<LatLng>? = null
-            if (streets.isNotEmpty()) {
-                val pathMid =
-                    if (navPath.isNotEmpty()) navPath[navPath.size / 2] else cameraPositionState.position.target
-                heuristicStreet = streets.minByOrNull { st ->
-                    val mids = st[st.size / 2]
-                    haversineMeters(
-                        pathMid.latitude,
-                        pathMid.longitude,
-                        mids.latitude,
-                        mids.longitude
-                    )
-                }
-            }
-
             dialogTitle = "Time: $timeslot"
-            dialogMessage = explanationForSlotAndStreet(timeslot, heuristicStreet)
+            dialogMessage = "Predicted traffic: $level"
             showDialog = true
-        }
+        },
+        userPointsState = remember { mutableStateOf(userPoints) } // optional: or pass a state that is kept in parent
     )
+
+
+    // ✅ Now place Metro/EV/reward UI separately
+    Divider(modifier = Modifier.padding(vertical = 6.dp))
+
+// Metro frequency tracker
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("Metro rides this month: $metroFrequency", style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = { metroFrequency++ }) { Text("+1") }
+    }
+
+// EV frequency tracker
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("EV rides this month: $evFrequency", style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = { evFrequency++ }) { Text("+1") }
+    }
+
+// Reward check
+    if (metroFrequency >= 10) {
+        Text("✅ Reward unlocked for Metro usage!", style = MaterialTheme.typography.bodySmall)
+    }
+    if (evFrequency >= 5) {
+        Text("✅ Reward unlocked for EV usage!", style = MaterialTheme.typography.bodySmall)
+    }
+
+    Divider(modifier = Modifier.padding(vertical = 6.dp))
+
+// Redeem rewards row
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { showRedeemDialog = true }
+            .padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Star, // make sure you imported it
+            contentDescription = "Redeem rewards",
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text("Redeem rewards", style = MaterialTheme.typography.bodyMedium)
+    }
 
     // Floating UI panel with recommendations and controls
     Column(
@@ -1457,8 +1593,7 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                     }
                 }
 
-
-// Very simple preview of uploaded image
+            // Very simple preview of uploaded image
                 uploadedImageUri?.let { uri ->
                     val ctx = LocalContext.current
                     Column(modifier = Modifier.padding(8.dp)) {
@@ -1467,8 +1602,8 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                         AsyncImage(
                             model = ImageRequest.Builder(ctx)
                                 .data(uri)
-                                .size(480, 480)   // safe downscale
-                                .crossfade(false) // disable fade to avoid crashes
+                                .size(480, 480)
+                                .crossfade(false)
                                 .build(),
                             contentDescription = "uploaded image",
                             modifier = Modifier
@@ -1476,17 +1611,6 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                                 .height(200.dp),
                             contentScale = ContentScale.Crop
                         )
-                    }
-                } ?: run {
-                    // fallback when nothing is selected
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .background(Color.LightGray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No image selected", style = MaterialTheme.typography.bodySmall)
                     }
                 }
 
