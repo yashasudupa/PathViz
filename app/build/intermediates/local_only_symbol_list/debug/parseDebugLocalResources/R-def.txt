@@ -10,5 +10,8 @@ color your_onSurface
 color your_primary
 color your_secondary
 color your_surface
+drawable pre_annotated
 string app_name
 style Theme.Material3.DayNight
+xml file_paths
+xml network_security_config

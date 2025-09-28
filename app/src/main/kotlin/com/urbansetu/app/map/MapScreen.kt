@@ -1,12 +1,11 @@
 package com.urbansetu.app.map
+
 import androidx.compose.ui.geometry.Offset
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -107,12 +106,371 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Upload
 
+// --- Add these imports near other imports ---
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Multipart
+import retrofit2.http.Part
+import retrofit2.http.POST
+import retrofit2.Response
+import coil.compose.AsyncImage
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
+
+// add imports if not already present
+import android.Manifest
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.content.FileProvider
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import coil.compose.AsyncImage
+import java.io.File
+import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import coil.request.ImageRequest
+import coil.compose.AsyncImage
+import coil.request.ImageResult
+import coil.request.SuccessResult
+import coil.request.ErrorResult
+import coil.request.ImageRequest.Builder
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import android.util.Log
+
+fun bitmapFromBase64String(dataUri: String): Bitmap? {
+    val base64Part = if (dataUri.startsWith("data:")) dataUri.substringAfter(",") else dataUri
+    return try {
+        val decoded = Base64.decode(base64Part, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+// helper: create a Uri from a file path, prefer FileProvider (recommended)
+fun uriFromFilePath(context: Context, path: String): Uri? {
+    val file = File(path)
+    if (!file.exists()) return null
+    // Try FileProvider first (recommended for modern Android)
+    return try {
+        val authority = "${context.packageName}.fileprovider"
+        FileProvider.getUriForFile(context, authority, file)
+    } catch (e: IllegalArgumentException) {
+        // fallback to plain file Uri (works if file is accessible to app)
+        Uri.fromFile(file)
+    }
+}
+
+/**
+ * Composable UI snippet to paste into your MapScreenWith3DSimEco UI.
+ * - Provides an input for a path, an "Import" button, previews the image and triggers the
+ *   same upload/analysis coroutine (by calling handleImportedUri).
+ *
+ * Assumes the following variables are available in the same scope:
+ * - context (LocalContext.current)
+ * - scope (rememberCoroutineScope())
+ * - backendApi (your Retrofit instance)
+ * - cameraPositionState
+ * - previous handlers: readBytesFromUri(...), createImageMultipart(...), strPart(...)
+ *
+ * If not in the same scope, pass required dependencies as parameters.
+ */
+@Composable
+fun ImportImageByPathRow(
+    onImported: (Uri) -> Unit, // called when uri is successfully created and available
+    onError: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var inputPath by remember { mutableStateOf("") }
+
+    // runtime permission launcher (requests READ_MEDIA_IMAGES on Android 13+, else READ_EXTERNAL_STORAGE)
+    val storagePerm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+    val permLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            // handled below when clicking "Import"
+        }
+
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = inputPath,
+            onValueChange = { inputPath = it },
+            label = { Text("Absolute image path (device)") },
+            modifier = Modifier.weight(1f)
+        )
+
+        Column {
+            OutlinedButton(onClick = {
+                // request permission first (if required)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // launch permission request; after granting user will click Import again
+                    permLauncher.launch(storagePerm)
+                } else {
+                    // proceed directly (older devices)
+                    scope.launch {
+                        val uri = uriFromFilePath(context, inputPath)
+                        if (uri != null) {
+                            onImported(uri)
+                        } else {
+                            onError("File not found: $inputPath")
+                        }
+                    }
+                }
+            }) {
+                Text("Import")
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // quick helper: try a "force import" ignoring runtime request flow
+            TextButton(onClick = {
+                scope.launch {
+                    val uri = uriFromFilePath(context, inputPath)
+                    if (uri != null) onImported(uri) else onError("File not found: $inputPath")
+                }
+            }) {
+                Text("Force")
+            }
+        }
+    }
+}
+
+// Example handler function you can call from MapScreenWith3DSimEco
+fun handleImportedUriStartUpload(
+    context: Context,
+    scope: kotlinx.coroutines.CoroutineScope,
+    backendApi: BackendApi,
+    cameraPositionState: com.google.maps.android.compose.CameraPositionState,
+    uri: Uri,
+    updateStates: (annotatedImageUrl: String?, annotatedImageB64: String?, analysis: ImageAnalysis?, reward: RewardResult?, pointsAdded: Int) -> Unit,
+    onError: (String) -> Unit
+) {
+    scope.launch {
+        try {
+            // read image bytes
+            val bytes = readBytesFromUri(context, uri)
+            if (bytes.isEmpty()) {
+                onError("Cannot read image bytes")
+                return@launch
+            }
+
+            // create multipart
+            val filePart = createImageMultipart(bytes, "imported.jpg")
+            val latPart = strPart(cameraPositionState.position.target.latitude.toString())
+            val lngPart = strPart(cameraPositionState.position.target.longitude.toString())
+            val userIdPart = strPart("user_123")
+
+            // call your backend API
+            val resp = backendApi.uploadImage(filePart, latPart, lngPart, userIdPart)
+            if (!resp.isSuccessful) {
+                // fallback local analysis (if server failed)
+                val fallback = localImageAnalysisFallback(bytes)
+                val fallbackReward = computeLocalRewardFallback(fallback, null)
+                updateStates(null, null, fallback, fallbackReward, fallbackReward.points_total)
+            } else {
+                val body = resp.body()
+                updateStates(
+                    body?.annotatedImageUrl, /*new*/
+                    body?.annotatedImageB64,
+                    body?.analysis,
+                    body?.reward,
+                    body?.reward?.points_total ?: 0
+                )
+            }
+        } catch (e: Exception) {
+            onError(e.message ?: "Import/upload failed")
+        }
+    }
+}
+
+// --- Data models for server response ---
+data class Issues(
+    val citizens: List<String>,
+    val children: List<String>,
+    val neighbourhood: List<String>
+)
+
+data class ImageAnalysis(
+    val litter_count: Int = 0,
+    val litter_area_ratio: Double = 0.0,
+    val haze_score: Double = 0.0,
+    val vehicles: Map<String, Int> = mapOf(),
+    val issues: Issues,
+    // Add optional reward so callers can provide it or omit it
+    val reward: RewardResult? = null
+)
+
+data class RewardBreakdownItem(
+    val name: String,
+    val points: Int,
+    val reason: String
+)
+
+data class RewardResult(
+    val points_total: Int,
+    val breakdown: List<RewardBreakdownItem> = emptyList(),
+    val confidence: Double = 0.0,
+    val explanation: String = ""
+)
+
+data class AnalyzeResponse(
+    val annotatedImageUrl: String?,
+    val annotatedImageB64: String?,
+    val analysis: ImageAnalysis?,
+    val reward: RewardResult?
+)
+
+// --- Retrofit API interface (server must implement /api/analyze-upload) ---
+interface BackendApi {
+    @Multipart
+    @POST("api/analyze-upload")
+    suspend fun uploadImage(
+        @Part image: MultipartBody.Part,
+        @Part("latitude") latitude: RequestBody?,
+        @Part("longitude") longitude: RequestBody?,
+        @Part("userId") userId: RequestBody? // optional authentication
+    ): Response<AnalyzeResponse>
+}
+
+// helper to build retrofit (replace BASE_URL with your server endpoint)
+fun createBackendApi(baseUrl: String = "http://10.0.2.2:8000/"): BackendApi {
+    val retrofit = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    return retrofit.create(BackendApi::class.java)
+}
+
+suspend fun readBytesFromUri(context: android.content.Context, uri: Uri): ByteArray =
+    withContext(Dispatchers.IO) {
+        context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
+    }
+
+fun createImageMultipart(bytes: ByteArray, filename: String = "upload.jpg"): MultipartBody.Part {
+    val reqBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+    return MultipartBody.Part.createFormData("image", filename, reqBody)
+}
+
+fun strPart(value: String?) = value?.toRequestBody("text/plain".toMediaTypeOrNull())
 
 
 fun generateTimeslots(): List<String> {
     val fmt = DateTimeFormatter.ofPattern("h:mm a")
     return (0..23).map { hour -> LocalTime.of(hour, 0).format(fmt) }
 }
+
+// very simple fallback analyser (not a real ML model)
+// returns a naive "litter_count" based on image size (placeholder)
+// very simple fallback analyser (not a real ML model)
+fun localImageAnalysisFallback(bytes: ByteArray): ImageAnalysis {
+    val size = bytes.size
+    val estLitter = (size % 20) // deterministic demo number
+    val areaRatio = (estLitter.toDouble() / 100.0).coerceIn(0.0, 1.0)
+
+    val issues = Issues(
+        citizens = listOf("Demo citizen issue"),
+        children = listOf("Demo child safety issue"),
+        neighbourhood = listOf("Demo neighbourhood issue")
+    )
+
+    val reward = RewardResult(
+        points_total = (100 - estLitter).coerceAtLeast(0),
+        breakdown = listOf(
+            RewardBreakdownItem(
+                name = "cleanliness",
+                points = (100 - estLitter).coerceAtLeast(0),
+                reason = "Demo calculation"
+            )
+        ),
+        confidence = 0.8,
+        explanation = "Fallback analysis only"
+    )
+
+    return ImageAnalysis(
+        litter_count = estLitter,
+        litter_area_ratio = areaRatio,
+        haze_score = 0.1,
+        vehicles = mapOf("car" to (estLitter % 3)),
+        issues = issues,
+        reward = reward
+    )
+}
+
+
+
+// local deterministic fallback reward calculator
+fun computeLocalRewardFallback(current: ImageAnalysis, previous: ImageAnalysis?): RewardResult {
+    val uploadBase = 5
+    var pts = uploadBase
+    val breakdown = mutableListOf<RewardBreakdownItem>()
+    breakdown.add(RewardBreakdownItem("upload_base", uploadBase, "Initial upload"))
+
+    if (previous != null && previous.litter_count > 0) {
+        val diff = (previous.litter_count - current.litter_count).toDouble()
+        val improvementFraction = (diff / previous.litter_count).coerceIn(0.0, 1.0)
+        val cleanupBase = 50
+        val cleanupPts = (cleanupBase * improvementFraction).roundToInt()
+        if (cleanupPts > 0) {
+            breakdown.add(
+                RewardBreakdownItem(
+                    "cleanup_improvement",
+                    cleanupPts,
+                    "Estimated improvement: ${"%.0f".format(improvementFraction * 100)}%"
+                )
+            )
+            pts += cleanupPts
+        }
+    }
+    // small bonus for low haze
+    if (current.haze_score < 0.15) {
+        breakdown.add(RewardBreakdownItem("low_haze_bonus", 5, "Low visible haze"))
+        pts += 5
+    }
+    return RewardResult(
+        points_total = pts,
+        breakdown = breakdown,
+        confidence = 0.45,
+        explanation = "Local fallback estimation; final award from server may differ"
+    )
+}
+
 
 @Composable
 fun MapTopActionIcon(
@@ -195,7 +553,11 @@ fun MapTopActionIcon(
                     Divider(modifier = Modifier.padding(vertical = 6.dp))
 
                     // Timeslot chips (horizontally scrollable)
-                    Text("Select timeslot", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 6.dp))
+                    Text(
+                        "Select timeslot",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 6.dp)
+                    )
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
@@ -250,14 +612,18 @@ fun approxTrafficForTime(timeslot: String): String {
 
 // ---------- Utility: convert meters to degrees approx ----------
 private fun metersToDegreesLat(meters: Double) = meters / 111_111.0
-private fun metersToDegreesLng(meters: Double, lat: Double) = meters / (111_111.0 * cos(Math.toRadians(lat)))
+private fun metersToDegreesLng(meters: Double, lat: Double) =
+    meters / (111_111.0 * cos(Math.toRadians(lat)))
 
 // haversine distance (meters)
 private fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val R = 6371000.0
     val dLat = Math.toRadians(lat2 - lat1)
     val dLon = Math.toRadians(lon2 - lon1)
-    val a = sin(dLat / 2).pow(2.0) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2.0)
+    val a =
+        sin(dLat / 2).pow(2.0) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(
+            2.0
+        )
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 }
@@ -283,7 +649,11 @@ private fun computeBearing(from: LatLng, to: LatLng): Float {
 }
 
 // generate grid-like "streets" inside a circle area
-private fun generateGridPaths(center: LatLng, radiusMeters: Double, spacingMeters: Double): List<List<LatLng>> {
+private fun generateGridPaths(
+    center: LatLng,
+    radiusMeters: Double,
+    spacingMeters: Double
+): List<List<LatLng>> {
     val paths = mutableListOf<List<LatLng>>()
     val latSpan = metersToDegreesLat(radiusMeters)
     val lngSpan = metersToDegreesLng(radiusMeters, center.latitude)
@@ -443,6 +813,8 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         position = CameraPosition.fromLatLngZoom(LatLng(12.9716, 77.5946), 15f)
     }
 
+    var annotatedImageB64 by remember { mutableStateOf<String?>(null) }
+
     // selection + double-tap detection
     var lastTapTime by remember { mutableStateOf(0L) }
     var lastTapPos by remember { mutableStateOf<LatLng?>(null) }
@@ -486,11 +858,89 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
     var dialogTitle by remember { mutableStateOf("") }
     var dialogMessage by remember { mutableStateOf("") }
 
+    // network API (remember)
+    val backendApi = remember { createBackendApi("http://10.0.2.2:8000/") }
+
+// annotated image + analysis + reward states
+    var annotatedImageUrl by remember { mutableStateOf<String?>(null) }
+    var lastAnalysis by remember { mutableStateOf<ImageAnalysis?>(null) }
+    var lastReward by remember { mutableStateOf<RewardResult?>(null) }
+
+// upload / processing UI states
+    var uploading by remember { mutableStateOf(false) }
+    var uploadError by remember { mutableStateOf<String?>(null) }
+
+// Coroutine scope for launching uploads
+    val scope = rememberCoroutineScope()
+
+// optional: store previous analysis per location (in-memory)
+    val previousAnalysisForLocation =
+        remember { mutableStateMapOf<String, ImageAnalysis>() } // key could be location hash
+
+
     // Image upload (awareness only)
     var uploadedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uploadedImageUri = uri
-    }
+    val imagePicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            uploadedImageUri = uri
+
+            // start upload & processing
+            scope.launch {
+                try {
+                    uploading = true
+                    uploadError = null
+
+                    // read bytes
+                    val bytes = readBytesFromUri(context, uri)
+                    if (bytes.isEmpty()) throw Exception("Could not read image")
+
+                    // prepare multipart
+                    val filePart = createImageMultipart(bytes, "upload.jpg")
+
+                    // TODO: provide lat/long if available; here we will send camera target as location
+                    val latPart = strPart(cameraPositionState.position.target.latitude.toString())
+                    val lngPart = strPart(cameraPositionState.position.target.longitude.toString())
+                    val userIdPart = strPart("user_123") // replace with real user id / auth
+
+                    val resp = backendApi.uploadImage(filePart, latPart, lngPart, userIdPart)
+
+                    if (!resp.isSuccessful) {
+                        val msg = resp.errorBody()?.string() ?: "Upload failed: ${resp.code()}"
+                        uploadError = msg
+                        // fallback: compute a small local analysis and reward
+                        val fallback = localImageAnalysisFallback(bytes)
+                        lastAnalysis = fallback
+                        val fallbackReward = computeLocalRewardFallback(
+                            fallback,
+                            previousAnalysisForLocation["home"] /*maybe*/
+                        )
+                        lastReward = fallbackReward
+                        userPoints += fallbackReward.points_total
+                    } else {
+                        val body = resp.body()
+                        annotatedImageUrl = body?.annotatedImageUrl
+                        lastAnalysis = body?.analysis
+                        lastReward = body?.reward
+
+                        // persist previous analysis keyed by location (very simple)
+                        val locKey =
+                            "${cameraPositionState.position.target.latitude},${cameraPositionState.position.target.longitude}"
+                        body?.analysis?.let { previousAnalysisForLocation[locKey] = it }
+
+                        // award points received from server (server should be authoritative)
+                        if (body?.reward != null) {
+                            userPoints += body.reward.points_total
+                        }
+                    }
+                } catch (e: Exception) {
+                    uploadError = e.message ?: "Unknown error"
+                } finally {
+                    uploading = false
+                }
+            }
+        }
+
 
     // --- Heuristic helpers for street-level "usual" traffic and cleanliness ---
     fun streetVehicleCount(street: List<LatLng>): Int {
@@ -499,8 +949,15 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         for (v in vehicles) {
             for (i in 0 until street.size - 1) {
                 val mid = lerpLatLng(street[i], street[i + 1], 0.5)
-                val d = haversineMeters(v.position.latitude, v.position.longitude, mid.latitude, mid.longitude)
-                if (d < 40.0) { cnt++; break }
+                val d = haversineMeters(
+                    v.position.latitude,
+                    v.position.longitude,
+                    mid.latitude,
+                    mid.longitude
+                )
+                if (d < 40.0) {
+                    cnt++; break
+                }
             }
         }
         return cnt
@@ -511,12 +968,15 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         var hits = 0
         var lengthMeters = 0.0
         for (i in 0 until street.size - 1) {
-            val a = street[i]; val b = street[i+1]
+            val a = street[i];
+            val b = street[i + 1]
             lengthMeters += haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude)
             val mid = lerpLatLng(a, b, 0.5)
             for (lt in litter) {
                 val d = haversineMeters(lt.latitude, lt.longitude, mid.latitude, mid.longitude)
-                if (d < 30.0) { hits++ }
+                if (d < 30.0) {
+                    hits++
+                }
             }
         }
         if (lengthMeters <= 0.0) return 0.0
@@ -543,7 +1003,13 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         if (street != null) {
             val vCnt = streetVehicleCount(street)
             val litterD = streetLitterDensity(street)
-            sb.append("This street currently has ~$vCnt vehicles nearby and litter density ${"%.2f".format(litterD)} items/100m. ")
+            sb.append(
+                "This street currently has ~$vCnt vehicles nearby and litter density ${
+                    "%.2f".format(
+                        litterD
+                    )
+                } items/100m. "
+            )
             val finalLevel = heuristicTrafficLevelForStreet(street)
             sb.append("Heuristic traffic level for this street: $finalLevel. ")
             // actionable advice
@@ -593,7 +1059,10 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                     repeat(toAdd) {
                         val v = Vehicle(
                             id = "v${System.nanoTime()}",
-                            position = LatLng(12.9716 + rng.nextDouble(-0.003, 0.003), 77.5946 + rng.nextDouble(-0.003, 0.003)),
+                            position = LatLng(
+                                12.9716 + rng.nextDouble(-0.003, 0.003),
+                                77.5946 + rng.nextDouble(-0.003, 0.003)
+                            ),
                             heading = rng.nextFloat() * 360f,
                             speedMps = (2..5).random().toFloat(),
                             type = listOf("Taxi", "Auto", "Bus", "Car").random()
@@ -603,6 +1072,7 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                 }
                 vehicles.forEach { it.speedMps = (2..5).random().toFloat() }
             }
+
             else -> vehicles.forEach { it.speedMps = (5..10).random().toFloat() }
         }
     }
@@ -635,10 +1105,15 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
             for (i in vehicles.indices) {
                 val v = vehicles[i]
                 val distMeters = v.speedMps * dtSeconds
-                val dLat = metersToDegreesLat(distMeters * cos(Math.toRadians(v.heading.toDouble())))
-                val dLng = metersToDegreesLng(distMeters * sin(Math.toRadians(v.heading.toDouble())), v.position.latitude)
+                val dLat =
+                    metersToDegreesLat(distMeters * cos(Math.toRadians(v.heading.toDouble())))
+                val dLng = metersToDegreesLng(
+                    distMeters * sin(Math.toRadians(v.heading.toDouble())),
+                    v.position.latitude
+                )
                 v.position = LatLng(v.position.latitude + dLat, v.position.longitude + dLng)
-                if (rng.nextFloat() < 0.08f) v.heading = (v.heading + rng.nextFloat() * 60f - 30f) % 360f
+                if (rng.nextFloat() < 0.08f) v.heading =
+                    (v.heading + rng.nextFloat() * 60f - 30f) % 360f
             }
             delay(700L)
         }
@@ -675,7 +1150,8 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         onMapLongClick = { latlng ->
-            infoText = "Generating area at ${"%.5f".format(latlng.latitude)}, ${"%.5f".format(latlng.longitude)}..."
+            infoText =
+                "Generating area at ${"%.5f".format(latlng.latitude)}, ${"%.5f".format(latlng.longitude)}..."
             val radius = selectionRadius
             val spacing = 40.0
             val newStreets = generateGridPaths(latlng, radius, spacing)
@@ -706,7 +1182,8 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
             if (streets.isNotEmpty()) navPath.addAll(streets.first())
 
             selectionCenter = latlng
-            infoText = "Area selected: ${"%.0f".format(radius)}m radius. Streets: ${streets.size}, buildings: ${buildings.size}, litter: ${litter.size}. Double-tap a street to get recommendations."
+            infoText =
+                "Area selected: ${"%.0f".format(radius)}m radius. Streets: ${streets.size}, buildings: ${buildings.size}, litter: ${litter.size}. Double-tap a street to get recommendations."
 
             // initial vehicle spawn
             vehicles.clear()
@@ -718,7 +1195,12 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
             val prev = lastTapTime
             val prevPos = lastTapPos
             if (now - prev <= doubleTapThreshold && prevPos != null) {
-                val d = haversineMeters(prevPos.latitude, prevPos.longitude, latlng.latitude, latlng.longitude)
+                val d = haversineMeters(
+                    prevPos.latitude,
+                    prevPos.longitude,
+                    latlng.latitude,
+                    latlng.longitude
+                )
                 if (d <= doubleTapDistanceMeters) {
                     // double-tap
                     var bestStreet: List<LatLng>? = null
@@ -728,7 +1210,12 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                         val line = streets[si]
                         for (i in 0 until line.size - 1) {
                             val mid = lerpLatLng(line[i], line[i + 1], 0.5)
-                            val dd = haversineMeters(latlng.latitude, latlng.longitude, mid.latitude, mid.longitude)
+                            val dd = haversineMeters(
+                                latlng.latitude,
+                                latlng.longitude,
+                                mid.latitude,
+                                mid.longitude
+                            )
                             if (dd < bestDist) {
                                 bestDist = dd
                                 bestStreet = line
@@ -769,9 +1256,12 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                         // create navPath sample
                         navPath.clear()
                         val sample = bestStreet
-                        for (i in 0 until sample.size step max(1, sample.size / 6)) navPath.add(sample[i])
+                        for (i in 0 until sample.size step max(1, sample.size / 6)) navPath.add(
+                            sample[i]
+                        )
 
-                        infoText = "Recommendations generated for the selected street (dist ${bestDist.toInt()}m)."
+                        infoText =
+                            "Recommendations generated for the selected street (dist ${bestDist.toInt()}m)."
 
                     } else {
                         infoText = "Double-tap detected but no nearby street segment found."
@@ -820,7 +1310,8 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                 cameraPositionState.position.target.longitude,
                 lt.latitude, lt.longitude
             )
-            val scale = (0.4f + 0.6f * max(0.2f, 500f / max(1f, distance.toFloat()))).coerceIn(0.25f, 1f)
+            val scale =
+                (0.4f + 0.6f * max(0.2f, 500f / max(1f, distance.toFloat()))).coerceIn(0.25f, 1f)
             val s = (litterBmp.width * scale).toInt().coerceAtLeast(6)
             val bmp = Bitmap.createScaledBitmap(litterBmp, s, s, true)
             Marker(
@@ -848,13 +1339,45 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
 
         if (navPath.isNotEmpty()) {
             Polyline(points = navPath, width = 10f)
-            Marker(state = MarkerState(position = cameraPositionState.position.target), title = "Navigator")
+            Marker(
+                state = MarkerState(position = cameraPositionState.position.target),
+                title = "Navigator"
+            )
         }
 
         selectionCenter?.let { c ->
             Circle(center = c, radius = selectionRadius, strokeWidth = 2f)
         }
     }
+
+    // in composable scope
+    ImportImageByPathRow(
+        onImported = { uri ->
+            // show preview immediately
+            uploadedImageUri = uri
+
+            // call existing handler (the helper above) to upload/analysis (re-use scope & backendApi)
+            handleImportedUriStartUpload(
+                context = context,
+                scope = scope,
+                backendApi = backendApi,
+                cameraPositionState = cameraPositionState,
+                uri = uri,
+                updateStates = { annotatedUrl, annotatedB64, analysis, reward, pts ->
+                    annotatedImageUrl = annotatedUrl
+                    annotatedImageB64 = annotatedB64
+                    lastAnalysis = analysis
+                    lastReward = reward
+                    if (pts > 0) userPoints += pts
+                },
+                onError = { msg ->
+                    uploadError = msg
+                }
+            )
+        },
+        onError = { err -> uploadError = err },
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+    )
 
     // --- put this right AFTER the GoogleMap(...) { ... } block and BEFORE your floating Column ---
     MapTopActionIcon(
@@ -874,10 +1397,16 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
             // pick a heuristic street (re-using logic you already have)
             var heuristicStreet: List<LatLng>? = null
             if (streets.isNotEmpty()) {
-                val pathMid = if (navPath.isNotEmpty()) navPath[navPath.size / 2] else cameraPositionState.position.target
+                val pathMid =
+                    if (navPath.isNotEmpty()) navPath[navPath.size / 2] else cameraPositionState.position.target
                 heuristicStreet = streets.minByOrNull { st ->
                     val mids = st[st.size / 2]
-                    haversineMeters(pathMid.latitude, pathMid.longitude, mids.latitude, mids.longitude)
+                    haversineMeters(
+                        pathMid.latitude,
+                        pathMid.longitude,
+                        mids.latitude,
+                        mids.longitude
+                    )
                 }
             }
 
@@ -889,7 +1418,9 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
 
     // Floating UI panel with recommendations and controls
     Column(
-        modifier = Modifier.padding(12.dp).zIndex(10f)
+        modifier = Modifier
+            .padding(12.dp)
+            .zIndex(10f)
     ) {
         Card(shape = RoundedCornerShape(8.dp)) {
             Column(modifier = Modifier.padding(8.dp)) {
@@ -909,6 +1440,111 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                     }) { Text("Clear") }
                 }
 
+                // Decode base64 annotation off the UI thread if provided
+                // decode base64 off UI thread (delegated property triggers recomposition when annotatedImageB64 changes)
+                val decodedAnnotatedBitmap by produceState<Bitmap?>(initialValue = null, annotatedImageB64) {
+                    // copy the delegated property to a local stable val so Kotlin can smart-cast it safely
+                    val b64 = annotatedImageB64
+
+                    if (b64.isNullOrEmpty()) {
+                        value = null
+                    } else {
+                        // here `b64` is a local val and Kotlin allows using it without the delegated-property limitation
+                        value = withContext(Dispatchers.IO) {
+                            // b64 is non-null in this branch, safe to pass to helper
+                            bitmapFromBase64String(b64)
+                        }
+                    }
+                }
+
+
+// Very simple preview of uploaded image
+                uploadedImageUri?.let { uri ->
+                    val ctx = LocalContext.current
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text("Uploaded image:", style = MaterialTheme.typography.bodySmall)
+
+                        AsyncImage(
+                            model = ImageRequest.Builder(ctx)
+                                .data(uri)
+                                .size(480, 480)   // safe downscale
+                                .crossfade(false) // disable fade to avoid crashes
+                                .build(),
+                            contentDescription = "uploaded image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                } ?: run {
+                    // fallback when nothing is selected
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No image selected", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+
+// show analysis metrics
+                lastAnalysis?.let { a ->
+                    Column(modifier = Modifier.padding(4.dp)) {
+                        Text("Analysis:", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "Litter items: ${a.litter_count}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            "Litter area ratio: ${"%.2f".format(a.litter_area_ratio)}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            "Haze score: ${"%.2f".format(a.haze_score)}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        // Show issues grouped by category
+                        Text("Issues:", style = MaterialTheme.typography.bodySmall)
+                        a.issues.citizens.forEach {
+                            Text("- Citizens: $it", style = MaterialTheme.typography.bodySmall)
+                        }
+                        a.issues.children.forEach {
+                            Text("- Children: $it", style = MaterialTheme.typography.bodySmall)
+                        }
+                        a.issues.neighbourhood.forEach {
+                            Text("- Neighbourhood: $it", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+// show reward breakdown and apply points (server is authoritative; we already added points when response arrived)
+                lastReward?.let { r ->
+                    Column(modifier = Modifier.padding(4.dp)) {
+                        Text("Reward:", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "Points awarded: ${r.points_total} (confidence ${"%.2f".format(r.confidence)})",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        r.breakdown.forEach { item ->
+                            Text(
+                                "${item.name}: +${item.points} — ${item.reason}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Text(r.explanation, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+
+// uploading & errors
+                if (uploading) {
+                    Text("Processing image...", style = MaterialTheme.typography.bodySmall)
+                }
+                uploadError?.let { err -> Text("Upload error: $err", color = Color.Red) }
+
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(trafficPredictionText, modifier = Modifier.padding(4.dp))
@@ -927,13 +1563,24 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                     localRecommendations.forEach { rec ->
                         when (rec) {
                             is Recommendation.EcoTask -> {
-                                Card(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)) {
-                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(rec.title, style = MaterialTheme.typography.titleMedium)
-                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                            Text(
+                                                rec.title,
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                rec.description,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Button(onClick = {
@@ -947,27 +1594,51 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                                                     val currentStreet = if (navPath.size >= 2) {
                                                         // try to find a street that matches navPath endpoints
                                                         streets.minByOrNull { st ->
-                                                            val d1 = haversineMeters(navPath.first().latitude, navPath.first().longitude, st[0].latitude, st[0].longitude)
-                                                            val d2 = haversineMeters(navPath.last().latitude, navPath.last().longitude, st[st.size-1].latitude, st[st.size-1].longitude)
+                                                            val d1 = haversineMeters(
+                                                                navPath.first().latitude,
+                                                                navPath.first().longitude,
+                                                                st[0].latitude,
+                                                                st[0].longitude
+                                                            )
+                                                            val d2 = haversineMeters(
+                                                                navPath.last().latitude,
+                                                                navPath.last().longitude,
+                                                                st[st.size - 1].latitude,
+                                                                st[st.size - 1].longitude
+                                                            )
                                                             d1 + d2
                                                         }
                                                     } else null
 
                                                     navPath.clear();
-                                                    for (i in 0 until pick.size step max(1, pick.size / 6)) navPath.add(pick[i])
+                                                    for (i in 0 until pick.size step max(
+                                                        1,
+                                                        pick.size / 6
+                                                    )) navPath.add(pick[i])
                                                     // new litter and vehicles
                                                     litter.clear(); vehicles.clear()
                                                     val r2 = Random(System.currentTimeMillis())
                                                     for (line in streets) {
                                                         for (i in 0 until line.size - 1) if (r2.nextFloat() < 0.05f) {
-                                                            litter.add(lerpLatLng(line[i], line[i + 1], r2.nextDouble()))
+                                                            litter.add(
+                                                                lerpLatLng(
+                                                                    line[i],
+                                                                    line[i + 1],
+                                                                    r2.nextDouble()
+                                                                )
+                                                            )
                                                         }
                                                     }
                                                     spawnVehiclesOnStreet(pick, 6)
-                                                    infoText = "Followed '${rec.title}'. Switching to alternate route and updating vehicles/litter."
+                                                    infoText =
+                                                        "Followed '${rec.title}'. Switching to alternate route and updating vehicles/litter."
                                                     // show explanation comparing current vs candidate
                                                     dialogTitle = "Why this route?"
-                                                    dialogMessage = explanationForRouteChangeCompared(currentStreet, pick)
+                                                    dialogMessage =
+                                                        explanationForRouteChangeCompared(
+                                                            currentStreet,
+                                                            pick
+                                                        )
                                                     showDialog = true
                                                 }
                                             }
@@ -979,13 +1650,24 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                             }
 
                             is Recommendation.AwarenessUpload -> {
-                                Card(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)) {
-                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(rec.title, style = MaterialTheme.typography.titleMedium)
-                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                            Text(
+                                                rec.title,
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                rec.description,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Button(onClick = { imagePicker.launch("image/*") }) { Text("Upload") }
@@ -994,13 +1676,24 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                             }
 
                             is Recommendation.DriverCheck -> {
-                                Card(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)) {
-                                    Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text("Driver cleanliness: ${rec.vehicleType}", style = MaterialTheme.typography.titleMedium)
-                                            Text(rec.description, style = MaterialTheme.typography.bodySmall)
+                                            Text(
+                                                "Driver cleanliness: ${rec.vehicleType}",
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                rec.description,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Button(onClick = {
@@ -1009,11 +1702,17 @@ fun MapScreenWith3DSimEco(modifier: Modifier = Modifier.fillMaxSize()) {
                                                 userPoints += rec.rewardPoints
                                                 // small cleanup effect
                                                 val removed = min(litter.size, 3)
-                                                repeat(removed) { if (litter.isNotEmpty()) litter.removeAt(0) }
-                                                infoText = "Driver verified. Awarded ${rec.rewardPoints} points and cleaned some litter."
+                                                repeat(removed) {
+                                                    if (litter.isNotEmpty()) litter.removeAt(
+                                                        0
+                                                    )
+                                                }
+                                                infoText =
+                                                    "Driver verified. Awarded ${rec.rewardPoints} points and cleaned some litter."
                                                 // show explanation why driver cleanliness matters here
                                                 dialogTitle = "Why verify driver cleanliness?"
-                                                dialogMessage = "Cleaner vehicles reduce local trash and improve passenger comfort; drivers who keep vehicles clean help make the route safer and healthier for everyone."
+                                                dialogMessage =
+                                                    "Cleaner vehicles reduce local trash and improve passenger comfort; drivers who keep vehicles clean help make the route safer and healthier for everyone."
                                                 showDialog = true
                                             }
                                         }) { Text("Verify +${rec.rewardPoints}") }

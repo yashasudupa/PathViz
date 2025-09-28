@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.urbansetu.app-mergeDebugResources-75:/values-ro/values-ro.xml",
+            "outputFile": "com.urbansetu.app-mergeDebugResources-76:/values-ro/values-ro.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Achira\\.gradle\\caches\\9.0-milestone-1\\transforms\\1bd213d7a51d18028e2b1b05aa32bcf6\\transformed\\jetified-foundation-release\\res\\values-ro\\values-ro.xml",
