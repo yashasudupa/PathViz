@@ -1,37 +1,38 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:14:5-22:16
+INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:15:5-23:16
 	android:grantUriPermissions
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:18:9-43
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:19:9-43
 	android:authorities
 		INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:16:9-60
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:17:9-60
 	android:exported
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:17:9-33
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:18:9-33
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:15:9-58
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:16:9-58
 manifest
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-36:12
-INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-36:12
-INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-36:12
-INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-36:12
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-37:12
+INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-37:12
+INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-37:12
+INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:1:1-37:12
 MERGED from [com.google.maps.android:maps-compose:2.11.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\d277d0a3055d49e0169ddf3a07f3eb14\transformed\jetified-maps-compose-2.11.0\AndroidManifest.xml:17:1-24:12
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e65e676a99a3da31219e405b6b4c3ad6\transformed\material-1.9.0\AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.work:work-runtime-ktx:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\ff6ccd2a5e010dbec983b0933f020a6c\transformed\work-runtime-ktx-2.9.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.work:work-runtime:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\bcfc54d7eb9948d2c3b39287b1f0fa76\transformed\work-runtime-2.9.1\AndroidManifest.xml:17:1-145:12
+MERGED from [com.google.android.gms:play-services-location:21.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1aa5a1acf78d0228a64ea649c970f178\transformed\jetified-play-services-location-21.2.0\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.maps.android:maps-ktx:3.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c2f9242443eeaa4bc0a87cc1bb0c1fad\transformed\jetified-maps-ktx-3.3.0\AndroidManifest.xml:18:1-25:12
 MERGED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:17:1-44:12
-MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:16:1-24:12
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1afabc7ec3c22824e72c70ac54d78fe\transformed\jetified-play-services-tasks-18.0.1\AndroidManifest.xml:2:1-6:12
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:16:1-26:12
-MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:2:1-11:12
-MERGED from [io.coil-kt:coil-compose:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7e5af67622cfe5cdcac2e22cd63cc5bb\transformed\jetified-coil-compose-2.2.2\AndroidManifest.xml:2:1-9:12
-MERGED from [io.coil-kt:coil-compose-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd79397e50230e2dd779ca8ebd9b1974\transformed\jetified-coil-compose-base-2.2.2\AndroidManifest.xml:2:1-9:12
-MERGED from [io.coil-kt:coil:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7bf3d7141308806d2ccbc9c8573a9520\transformed\jetified-coil-2.2.2\AndroidManifest.xml:2:1-9:12
-MERGED from [io.coil-kt:coil-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\ad6a3779006b70949c3002ed1271364f\transformed\jetified-coil-base-2.2.2\AndroidManifest.xml:2:1-9:12
-MERGED from [androidx.appcompat:appcompat-resources:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9622e772024ea2ad511d969bfb6fe237\transformed\jetified-appcompat-resources-1.5.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.appcompat:appcompat:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8988dd1dbe98d3f3092a9de3063710e6\transformed\appcompat-1.5.0\AndroidManifest.xml:17:1-22:12
+MERGED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:16:1-24:12
+MERGED from [com.google.android.gms:play-services-tasks:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b80c1f4c67a71ad694bfd87a59a378bd\transformed\jetified-play-services-tasks-18.1.0\AndroidManifest.xml:2:1-6:12
+MERGED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:16:1-26:12
 MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a0c5ac1f8a4a25815a439b8349337e5\transformed\coordinatorlayout-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:2:1-11:12
+MERGED from [io.coil-kt:coil-compose:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\46e034cf3deb569c375901de482f3a1e\transformed\jetified-coil-compose-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [io.coil-kt:coil-compose-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\2434cab38bbbf3ad2dfdccc1783aac36\transformed\jetified-coil-compose-base-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [io.coil-kt:coil:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9bae83ee4b5417b4a2671e1664ad69e7\transformed\jetified-coil-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [io.coil-kt:coil-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f21bd06b786613627d92c69d8d5a41b9\transformed\jetified-coil-base-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\034209c2f33e7bbca446109c1c87f818\transformed\jetified-appcompat-resources-1.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.appcompat:appcompat:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a7cd59c2ae46148fb693e77942be57b\transformed\appcompat-1.6.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\0fd5e9ae35cf330afea0fcd9e6619b92\transformed\drawerlayout-1.1.1\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\69d44b39258960138ee3c5248fdfd7d9\transformed\dynamicanimation-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.transition:transition:1.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1857b7392e06f8f52e7fdcb50ee6600\transformed\transition-1.2.0\AndroidManifest.xml:17:1-24:12
@@ -44,8 +45,8 @@ MERGED from [androidx.navigation:navigation-common-ktx:2.8.1] C:\Users\Achira\.g
 MERGED from [androidx.navigation:navigation-runtime-ktx:2.8.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\49199ece9317b8c5bd8fc0a76442db5b\transformed\navigation-runtime-ktx-2.8.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-compose:2.8.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\83a19d7ce20a9dcdb3ce3219c3597a67\transformed\jetified-navigation-compose-2.8.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7a51a265149265f79624c513fae767b2\transformed\jetified-material3-release\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5de5ede5d999c6a6bd4883549d006a7b\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.compose.material:material-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f396e488b1d21778093c8e5716c41daa\transformed\jetified-material-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\4d010852268730a10bf358dd385a4838\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.material:material-ripple-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c1505741babe6a5732dd05b28dc33ce4\transformed\jetified-material-ripple-release\AndroidManifest.xml:2:1-7:12
@@ -77,7 +78,7 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.6] C:\Users\A
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\67580d3b6c61e95b3289d4b8f3669ab7\transformed\jetified-lifecycle-viewmodel-ktx-2.8.6\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5b85d94a1f4a7c4f8643ecdd7fefae33\transformed\jetified-lifecycle-runtime-ktx-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1c5a2ae316f6b7f54e116ffd253e7f10\transformed\jetified-lifecycle-viewmodel-compose-release\AndroidManifest.xml:2:1-7:12
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.25.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f47ddc586321b8a3bb08bde0ee8d3b42\transformed\jetified-accompanist-drawablepainter-0.25.1\AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\910c967769118f38eb7c270e21c6bb40\transformed\jetified-accompanist-drawablepainter-0.32.0\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.compose.material:material-icons-extended-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8851fb78408d44e9a06586f4b9b1b0de\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-icons-core-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\2b234ea75f9642d0a18d776e5e5f455b\transformed\jetified-material-icons-core-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-android:1.7.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b4534894498e820e3ba720260e891dfe\transformed\jetified-ui-release\AndroidManifest.xml:2:1-7:12
@@ -105,13 +106,13 @@ MERGED from [androidx.cardview:cardview:1.0.0] C:\Users\Achira\.gradle\caches\9.
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\93f32c1fdbcf4a9ff9532c855a14b228\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\fe37601151eb3f2801b1f6f0e11463af\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:17:1-55:12
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e77960dd6f48171a908b0f56f95aba4f\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\efc243e20ec287c29d2e293724452f09\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\be237bf22ea113eee85df0d4f01edb12\transformed\exifinterface-1.3.7\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c00e5eab6e2055b45c6df42a2e5d6188\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.documentfile:documentfile:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\93293b6e21ed0b4abd003899ab4af810\transformed\documentfile-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dc3d76e4e0950bfcb025f4ffae1c46eb\transformed\localbroadcastmanager-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.print:print:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b18bd2e4e9745e41a68d1ed9736bdaa4\transformed\print-1.0.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.exifinterface:exifinterface:1.3.3] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c1392411f84f6c39eaf312162050f084\transformed\exifinterface-1.3.3\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:17:1-22:12
 	package
 		INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml
 	android:versionName
@@ -134,21 +135,27 @@ uses-permission#android.permission.ACCESS_COARSE_LOCATION
 ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:4:3-79
 	android:name
 		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:4:20-76
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:5:3-75
+	android:name
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:5:20-72
 application
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:6:3-35:19
-INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:6:3-35:19
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:7:3-36:19
+INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:7:3-36:19
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e65e676a99a3da31219e405b6b4c3ad6\transformed\material-1.9.0\AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e65e676a99a3da31219e405b6b4c3ad6\transformed\material-1.9.0\AndroidManifest.xml:24:5-20
 MERGED from [androidx.work:work-runtime:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\bcfc54d7eb9948d2c3b39287b1f0fa76\transformed\work-runtime-2.9.1\AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.work:work-runtime:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\bcfc54d7eb9948d2c3b39287b1f0fa76\transformed\work-runtime-2.9.1\AndroidManifest.xml:28:5-143:19
+MERGED from [com.google.android.gms:play-services-location:21.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1aa5a1acf78d0228a64ea649c970f178\transformed\jetified-play-services-location-21.2.0\AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-location:21.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1aa5a1acf78d0228a64ea649c970f178\transformed\jetified-play-services-location-21.2.0\AndroidManifest.xml:7:5-20
 MERGED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:36:5-42:19
 MERGED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:36:5-42:19
-MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:19:5-23:19
-MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:19:5-23:19
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1afabc7ec3c22824e72c70ac54d78fe\transformed\jetified-play-services-tasks-18.0.1\AndroidManifest.xml:5:5-20
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1afabc7ec3c22824e72c70ac54d78fe\transformed\jetified-play-services-tasks-18.0.1\AndroidManifest.xml:5:5-20
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:20:5-24:19
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:20:5-24:19
+MERGED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:19:5-23:19
+MERGED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:19:5-23:19
+MERGED from [com.google.android.gms:play-services-tasks:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b80c1f4c67a71ad694bfd87a59a378bd\transformed\jetified-play-services-tasks-18.1.0\AndroidManifest.xml:5:5-20
+MERGED from [com.google.android.gms:play-services-tasks:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b80c1f4c67a71ad694bfd87a59a378bd\transformed\jetified-play-services-tasks-18.1.0\AndroidManifest.xml:5:5-20
+MERGED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:20:5-24:19
+MERGED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:20:5-24:19
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:9:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:9:5-20
 MERGED from [androidx.emoji2:emoji2:1.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\d179bbd927bb68704195d9f86b9acce5\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:23:5-33:19
@@ -172,45 +179,45 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Achira\.gradle\cac
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\0c822726baacd5030befe6b047bac3e2\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 	android:label
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:8:7-32
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:9:7-32
 	android:icon
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:9:7-53
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:10:7-53
 	android:allowBackup
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:7:7-33
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:8:7-33
 	android:theme
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:10:7-54
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:11:7-54
 	android:networkSecurityConfig
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:11:7-67
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:12:7-67
 	android:usesCleartextTraffic
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:12:7-42
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:13:7-42
 activity#com.urbansetu.app.MainActivity
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:24:5-31:16
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:25:5-32:16
 	android:exported
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:26:9-32
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:27:9-32
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:25:9-37
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:26:9-37
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:27:7-30:23
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:28:7-31:23
 action#android.intent.action.MAIN
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:28:9-61
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:29:9-61
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:28:17-58
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:29:17-58
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:29:9-69
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:30:9-69
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:29:19-66
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:30:19-66
 meta-data#com.google.android.geo.API_KEY
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:32:9-34:70
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:33:9-35:70
 	android:value
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:34:13-68
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:35:13-68
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:33:13-58
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:34:13-58
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:19:7-21:48
+ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:20:7-22:48
 	android:resource
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:21:11-45
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:22:11-45
 	android:name
-		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:20:11-61
+		ADDED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml:21:11-61
 uses-sdk
 INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml
@@ -223,32 +230,34 @@ MERGED from [androidx.work:work-runtime-ktx:2.9.1] C:\Users\Achira\.gradle\cache
 MERGED from [androidx.work:work-runtime-ktx:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\ff6ccd2a5e010dbec983b0933f020a6c\transformed\work-runtime-ktx-2.9.1\AndroidManifest.xml:20:5-44
 MERGED from [androidx.work:work-runtime:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\bcfc54d7eb9948d2c3b39287b1f0fa76\transformed\work-runtime-2.9.1\AndroidManifest.xml:21:5-44
 MERGED from [androidx.work:work-runtime:2.9.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\bcfc54d7eb9948d2c3b39287b1f0fa76\transformed\work-runtime-2.9.1\AndroidManifest.xml:21:5-44
+MERGED from [com.google.android.gms:play-services-location:21.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1aa5a1acf78d0228a64ea649c970f178\transformed\jetified-play-services-location-21.2.0\AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-location:21.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1aa5a1acf78d0228a64ea649c970f178\transformed\jetified-play-services-location-21.2.0\AndroidManifest.xml:5:5-44
 MERGED from [com.google.maps.android:maps-ktx:3.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c2f9242443eeaa4bc0a87cc1bb0c1fad\transformed\jetified-maps-ktx-3.3.0\AndroidManifest.xml:21:5-23:41
 MERGED from [com.google.maps.android:maps-ktx:3.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c2f9242443eeaa4bc0a87cc1bb0c1fad\transformed\jetified-maps-ktx-3.3.0\AndroidManifest.xml:21:5-23:41
 MERGED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:20:5-44
 MERGED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:20:5-44
-MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1afabc7ec3c22824e72c70ac54d78fe\transformed\jetified-play-services-tasks-18.0.1\AndroidManifest.xml:4:5-43
-MERGED from [com.google.android.gms:play-services-tasks:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b1afabc7ec3c22824e72c70ac54d78fe\transformed\jetified-play-services-tasks-18.0.1\AndroidManifest.xml:4:5-43
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:18:5-43
-MERGED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:18:5-43
-MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:5:5-7:41
-MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-compose:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7e5af67622cfe5cdcac2e22cd63cc5bb\transformed\jetified-coil-compose-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-compose:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7e5af67622cfe5cdcac2e22cd63cc5bb\transformed\jetified-coil-compose-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-compose-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd79397e50230e2dd779ca8ebd9b1974\transformed\jetified-coil-compose-base-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-compose-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd79397e50230e2dd779ca8ebd9b1974\transformed\jetified-coil-compose-base-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7bf3d7141308806d2ccbc9c8573a9520\transformed\jetified-coil-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7bf3d7141308806d2ccbc9c8573a9520\transformed\jetified-coil-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\ad6a3779006b70949c3002ed1271364f\transformed\jetified-coil-base-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [io.coil-kt:coil-base:2.2.2] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\ad6a3779006b70949c3002ed1271364f\transformed\jetified-coil-base-2.2.2\AndroidManifest.xml:5:5-7:41
-MERGED from [androidx.appcompat:appcompat-resources:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9622e772024ea2ad511d969bfb6fe237\transformed\jetified-appcompat-resources-1.5.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.appcompat:appcompat-resources:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9622e772024ea2ad511d969bfb6fe237\transformed\jetified-appcompat-resources-1.5.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.appcompat:appcompat:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8988dd1dbe98d3f3092a9de3063710e6\transformed\appcompat-1.5.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.appcompat:appcompat:1.5.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8988dd1dbe98d3f3092a9de3063710e6\transformed\appcompat-1.5.0\AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-tasks:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b80c1f4c67a71ad694bfd87a59a378bd\transformed\jetified-play-services-tasks-18.1.0\AndroidManifest.xml:4:5-43
+MERGED from [com.google.android.gms:play-services-tasks:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b80c1f4c67a71ad694bfd87a59a378bd\transformed\jetified-play-services-tasks-18.1.0\AndroidManifest.xml:4:5-43
+MERGED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:18:5-43
+MERGED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:18:5-43
 MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a0c5ac1f8a4a25815a439b8349337e5\transformed\coordinatorlayout-1.1.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a0c5ac1f8a4a25815a439b8349337e5\transformed\coordinatorlayout-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\6b469c9eae50155dd3ea3851c41e9edf\transformed\constraintlayout-2.0.1\AndroidManifest.xml:5:5-7:41
+MERGED from [io.coil-kt:coil-compose:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\46e034cf3deb569c375901de482f3a1e\transformed\jetified-coil-compose-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\46e034cf3deb569c375901de482f3a1e\transformed\jetified-coil-compose-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\2434cab38bbbf3ad2dfdccc1783aac36\transformed\jetified-coil-compose-base-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\2434cab38bbbf3ad2dfdccc1783aac36\transformed\jetified-coil-compose-base-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9bae83ee4b5417b4a2671e1664ad69e7\transformed\jetified-coil-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\9bae83ee4b5417b4a2671e1664ad69e7\transformed\jetified-coil-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f21bd06b786613627d92c69d8d5a41b9\transformed\jetified-coil-base-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-base:2.7.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f21bd06b786613627d92c69d8d5a41b9\transformed\jetified-coil-base-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\034209c2f33e7bbca446109c1c87f818\transformed\jetified-appcompat-resources-1.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\034209c2f33e7bbca446109c1c87f818\transformed\jetified-appcompat-resources-1.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a7cd59c2ae46148fb693e77942be57b\transformed\appcompat-1.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5a7cd59c2ae46148fb693e77942be57b\transformed\appcompat-1.6.1\AndroidManifest.xml:20:5-44
 MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\0fd5e9ae35cf330afea0fcd9e6619b92\transformed\drawerlayout-1.1.1\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\0fd5e9ae35cf330afea0fcd9e6619b92\transformed\drawerlayout-1.1.1\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\69d44b39258960138ee3c5248fdfd7d9\transformed\dynamicanimation-1.0.0\AndroidManifest.xml:20:5-44
@@ -273,10 +282,10 @@ MERGED from [androidx.navigation:navigation-compose:2.8.1] C:\Users\Achira\.grad
 MERGED from [androidx.navigation:navigation-compose:2.8.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\83a19d7ce20a9dcdb3ce3219c3597a67\transformed\jetified-navigation-compose-2.8.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7a51a265149265f79624c513fae767b2\transformed\jetified-material3-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\7a51a265149265f79624c513fae767b2\transformed\jetified-material3-release\AndroidManifest.xml:20:5-44
-MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5de5ede5d999c6a6bd4883549d006a7b\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
 MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5de5ede5d999c6a6bd4883549d006a7b\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\39415bf8d634d4a22a9ce5e63e25886c\transformed\fragment-1.3.6\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.compose.material:material-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f396e488b1d21778093c8e5716c41daa\transformed\jetified-material-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f396e488b1d21778093c8e5716c41daa\transformed\jetified-material-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\4d010852268730a10bf358dd385a4838\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
@@ -339,8 +348,8 @@ MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.6] C:\Users\Ac
 MERGED from [androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\5b85d94a1f4a7c4f8643ecdd7fefae33\transformed\jetified-lifecycle-runtime-ktx-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1c5a2ae316f6b7f54e116ffd253e7f10\transformed\jetified-lifecycle-viewmodel-compose-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.6] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1c5a2ae316f6b7f54e116ffd253e7f10\transformed\jetified-lifecycle-viewmodel-compose-release\AndroidManifest.xml:5:5-44
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.25.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f47ddc586321b8a3bb08bde0ee8d3b42\transformed\jetified-accompanist-drawablepainter-0.25.1\AndroidManifest.xml:20:5-22:41
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.25.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\f47ddc586321b8a3bb08bde0ee8d3b42\transformed\jetified-accompanist-drawablepainter-0.25.1\AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\910c967769118f38eb7c270e21c6bb40\transformed\jetified-accompanist-drawablepainter-0.32.0\AndroidManifest.xml:21:5-44
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\910c967769118f38eb7c270e21c6bb40\transformed\jetified-accompanist-drawablepainter-0.32.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.compose.material:material-icons-extended-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8851fb78408d44e9a06586f4b9b1b0de\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-extended-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8851fb78408d44e9a06586f4b9b1b0de\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-core-android:1.7.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\2b234ea75f9642d0a18d776e5e5f455b\transformed\jetified-material-icons-core-release\AndroidManifest.xml:5:5-44
@@ -395,10 +404,10 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Achira\.
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\fe37601151eb3f2801b1f6f0e11463af\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e77960dd6f48171a908b0f56f95aba4f\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e77960dd6f48171a908b0f56f95aba4f\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\efc243e20ec287c29d2e293724452f09\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\efc243e20ec287c29d2e293724452f09\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\be237bf22ea113eee85df0d4f01edb12\transformed\exifinterface-1.3.7\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\be237bf22ea113eee85df0d4f01edb12\transformed\exifinterface-1.3.7\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c00e5eab6e2055b45c6df42a2e5d6188\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c00e5eab6e2055b45c6df42a2e5d6188\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.documentfile:documentfile:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\93293b6e21ed0b4abd003899ab4af810\transformed\documentfile-1.0.0\AndroidManifest.xml:20:5-44
@@ -407,8 +416,8 @@ MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\User
 MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dc3d76e4e0950bfcb025f4ffae1c46eb\transformed\localbroadcastmanager-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.print:print:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b18bd2e4e9745e41a68d1ed9736bdaa4\transformed\print-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.print:print:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b18bd2e4e9745e41a68d1ed9736bdaa4\transformed\print-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.exifinterface:exifinterface:1.3.3] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c1392411f84f6c39eaf312162050f084\transformed\exifinterface-1.3.3\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.exifinterface:exifinterface:1.3.3] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\c1392411f84f6c39eaf312162050f084\transformed\exifinterface-1.3.3\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\b3c936ab48ae7a177a9944b2e92fa2c6\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
 	android:targetSdkVersion
 		INJECTED from C:\Users\Achira\Downloads\urbansetu-prototype-v4\urbansetu\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
@@ -676,19 +685,19 @@ ADDED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.g
 	android:name
 		ADDED from [com.google.android.gms:play-services-maps:18.1.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\dd2ba38e9b0bbc4c31e5b7d4ba32f536\transformed\jetified-play-services-maps-18.1.0\AndroidManifest.xml:40:13-50
 activity#com.google.android.gms.common.api.GoogleApiActivity
-ADDED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:20:9-22:45
+ADDED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:20:9-22:45
 	android:exported
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:22:19-43
+		ADDED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:22:19-43
 	android:theme
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:21:19-78
+		ADDED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:21:19-78
 	android:name
-		ADDED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\8a1d5f28e089c90b9018a0dbbabc23f6\transformed\jetified-play-services-base-18.0.1\AndroidManifest.xml:20:19-85
+		ADDED from [com.google.android.gms:play-services-base:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\20d16b991657b2277ff80646295ae38e\transformed\jetified-play-services-base-18.3.0\AndroidManifest.xml:20:19-85
 meta-data#com.google.android.gms.version
-ADDED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:21:9-23:69
+ADDED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:21:9-23:69
 	android:value
-		ADDED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:23:13-66
+		ADDED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:23:13-66
 	android:name
-		ADDED from [com.google.android.gms:play-services-basement:18.0.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\e246cfdbd4b547dd1818a94c906bf644\transformed\jetified-play-services-basement-18.0.0\AndroidManifest.xml:22:13-58
+		ADDED from [com.google.android.gms:play-services-basement:18.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\1284515291d086f25b9de49331dfd7c4\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:22:13-58
 meta-data#androidx.emoji2.text.EmojiCompatInitializer
 ADDED from [androidx.emoji2:emoji2:1.3.0] C:\Users\Achira\.gradle\caches\9.0-milestone-1\transforms\d179bbd927bb68704195d9f86b9acce5\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
 	android:value

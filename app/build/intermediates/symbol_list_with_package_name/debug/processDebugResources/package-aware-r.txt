@@ -2928,8 +2928,9 @@ drawable design_password_eye
 drawable design_snackbar_background
 drawable googleg_disabled_color_18
 drawable googleg_standard_color_18
-drawable ic_100tb
+drawable hero_banner
 drawable ic_arrow_back_black_24
+drawable ic_cafe
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
@@ -2938,14 +2939,18 @@ drawable ic_call_decline
 drawable ic_call_decline_low
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
+drawable ic_fintech
+drawable ic_grocery
 drawable ic_keyboard_black_24dp
 drawable ic_m3_chip_check
 drawable ic_m3_chip_checked_circle
 drawable ic_m3_chip_close
+drawable ic_mobility
 drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
+drawable ic_offer
 drawable ic_search_black_24
 drawable m3_appbar_background
 drawable m3_avd_hide_password
@@ -3023,6 +3028,7 @@ drawable pre_annotated
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
+drawable urbansetu_logo
 id ALT
 id BOTTOM_END
 id BOTTOM_START

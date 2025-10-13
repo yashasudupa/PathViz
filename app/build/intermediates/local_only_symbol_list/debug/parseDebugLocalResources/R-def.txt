@@ -10,7 +10,14 @@ color your_onSurface
 color your_primary
 color your_secondary
 color your_surface
+drawable hero_banner
+drawable ic_cafe
+drawable ic_fintech
+drawable ic_grocery
+drawable ic_mobility
+drawable ic_offer
 drawable pre_annotated
+drawable urbansetu_logo
 string app_name
 style Theme.Material3.DayNight
 xml file_paths
