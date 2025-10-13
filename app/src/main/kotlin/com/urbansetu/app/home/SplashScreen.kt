@@ -1,5 +1,6 @@
 package com.urbansetu.app.home
 
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -39,15 +40,17 @@ fun SplashScreen(onFinish: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White), // or MaterialTheme.colorScheme.background
+            .background(Color.White), // optional background
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(R.drawable.urbansetu_logo),
             contentDescription = "UrbanSetu Logo",
             modifier = Modifier
-                .size(360.dp)
-                .alpha(alpha)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .alpha(alpha),
+            contentScale = ContentScale.Fit
         )
     }
 }

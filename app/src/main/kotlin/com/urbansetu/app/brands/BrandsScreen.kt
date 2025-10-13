@@ -1,5 +1,13 @@
 package com.urbansetu.app.brands
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.CancellationException
+import kotlin.math.max
+
 // ---------- Android ----------
 import android.Manifest
 import android.content.pm.PackageManager
@@ -162,16 +170,26 @@ private fun DistanceLine(b: Brand) {
 @Composable
 private fun BrandWideCard(b: Brand, onClick: (Brand) -> Unit) {
     LaunchedEffect(b.id) { AnalyticsRepo.trackImpressionOnce(b.id) }
+
     Card(
         onClick = { AnalyticsRepo.trackClick(b.id); onClick(b) },
-        modifier = Modifier.width(260.dp).height(132.dp).padding(end = 10.dp)
+        modifier = Modifier
+            .width(260.dp)
+            .height(132.dp)
+            .padding(end = 10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,   // ✅ solid light card
+            contentColor   = MaterialTheme.colorScheme.onSurface         // ✅ dark text
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.fillMaxSize().padding(12.dp)) {
-            Text(b.name, style = MaterialTheme.typography.titleMedium)
+            Text(b.name,     style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
-            Text(b.headline, style = MaterialTheme.typography.bodyMedium)
+            Text(b.headline, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
-            Text(b.subtext, style = MaterialTheme.typography.bodySmall)
+            Text(b.subtext,  style = MaterialTheme.typography.bodySmall)
+
             Spacer(Modifier.height(6.dp)); DistanceLine(b)
             Spacer(Modifier.height(6.dp)); BadgesRow(b)
             Spacer(Modifier.height(6.dp)); MetricsBadge(brandId = b.id)
@@ -186,19 +204,38 @@ private fun BrandTile(
     onEdit: (Brand) -> Unit = {},
     currentUserId: String? = null,
     openOwnerPanel: (Brand) -> Unit = {},
-    onManage: (Brand) -> Unit   // 👈 NEW
+    onManage: (Brand) -> Unit
 ) {
     LaunchedEffect(b.id) { AnalyticsRepo.trackImpressionOnce(b.id) }
     var showEditor by rememberSaveable { mutableStateOf(false) }
 
-    Card(onClick = { AnalyticsRepo.trackClick(b.id); onClick(b) }) {
+    Card(
+        onClick = { AnalyticsRepo.trackClick(b.id); onClick(b) },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,   // ✅
+            contentColor   = MaterialTheme.colorScheme.onSurface         // ✅
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
         Column(Modifier.padding(12.dp)) {
-            // ... your existing header, copy, buttons, badges, metrics ...
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painter = painterResource(b.logoRes), contentDescription = null, modifier = Modifier.size(36.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(b.name, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(b.headline, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            Text(b.subtext,  style = MaterialTheme.typography.bodySmall)
+
+            Spacer(Modifier.height(6.dp)); DistanceLine(b)
+            Spacer(Modifier.height(8.dp))
+            FilledTonalButton(onClick = { onClick(b) }) { Text("View offer") }
+            Spacer(Modifier.height(8.dp)); BadgesRow(b)
+            Spacer(Modifier.height(6.dp)); MetricsBadge(brandId = b.id)
 
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = { showEditor = true }) { Text("Edit radius") }
 
-            // ✅ Show “Manage” only for the owner
             if (currentUserId != null && currentUserId == b.ownerId) {
                 Spacer(Modifier.height(6.dp))
                 FilledTonalButton(onClick = { onManage(b) }) { Text("Manage") }
@@ -218,60 +255,105 @@ private fun BrandTile(
 
 // ==================== Hero rotation ====================
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeroRotating(banners: List<Brand>) {
-    if (banners.isEmpty()) return
-    val pagerState = rememberPagerState(pageCount = { banners.size })
-    val scope = rememberCoroutineScope()
-    DisposableEffect(banners.size) {
-        val job = scope.launch {
-            while (isActive && pagerState.pageCount > 0) {
+    val pageCount = max(1, banners.size)
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { pageCount }
+    )
+
+    // Auto-advance safely while this composition is active
+    LaunchedEffect(pageCount) {
+        // don’t loop if there’s only one page
+        if (pageCount <= 1) return@LaunchedEffect
+        try {
+            while (isActive) {
                 delay(2800)
                 val next = (pagerState.currentPage + 1) % pagerState.pageCount
-                pagerState.animateScrollToPage(next)
+                // guard against rare zero or disposal races
+                if (pagerState.pageCount > 0) {
+                    pagerState.animateScrollToPage(next)
+                }
             }
+        } catch (_: CancellationException) {
+            // composition left; ignore
+        } catch (_: Throwable) {
+            // swallow any transient pager exceptions to avoid crashing the app
         }
-        onDispose { job.cancel() }
     }
+
     Surface(
-        modifier = Modifier.fillMaxWidth().height(160.dp).clip(MaterialTheme.shapes.large)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(MaterialTheme.shapes.large),
+        color = MaterialTheme.colorScheme.primaryContainer
     ) {
         HorizontalPager(state = pagerState) { page ->
-            val b = banners[page % banners.size]
+            val b = banners.getOrNull(page % max(1, banners.size))
+            // If banners is empty, render a harmless placeholder
+            if (b == null) {
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer))
+                return@HorizontalPager
+            }
+
             Box(
                 Modifier
                     .fillMaxSize()
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                MaterialTheme.colorScheme.surface
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.95f),
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.90f)
                             )
                         )
                     )
             ) {
-                Column(Modifier.align(Alignment.CenterStart)) {
-                    Text(b.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(b.headline, color = Color.White)
+                // dark scrim for contrast
+                Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.28f)))
+
+                Column(
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        b.name,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        b.headline,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                     Spacer(Modifier.height(8.dp))
                     AssistChip(
-                        onClick = { /* no-op */ },
+                        onClick = { /* open brand */ },
                         label = { Text("View offer") },
-                        leadingIcon = { Icon(Icons.Filled.LocalOffer, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Filled.LocalOffer, null) },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            labelColor = MaterialTheme.colorScheme.onTertiary
                         )
                     )
                 }
+
                 Image(
                     painter = painterResource(b.logoRes),
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp).align(Alignment.BottomEnd)
+                    modifier = Modifier
+                        .size(64.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp)
                 )
             }
         }
     }
 }
+
 
 // ==================== Filters row ====================
 
@@ -288,6 +370,9 @@ fun FilterRow(categories: List<String>, selected: String, onSelected: (String) -
 }
 
 // ==================== Screen ====================
+
+// 🔧 Category normalization helper (fixes mismatch like "Cafe" vs "Cafés")
+private fun normalize(cat: String) = cat.trim().lowercase()
 
 @Composable
 fun BrandsScreen(
@@ -325,7 +410,10 @@ fun BrandsScreen(
     // derived data
     val all: List<Brand> = brands
     val featured = all.sortedByDescending { it.priority }.take(3)
-    val categoryFiltered = if (selected == "All") all else all.filter { it.category == selected }
+    val categoryFiltered =
+        if (selected == "All") all
+        else all.filter { normalize(it.category) == normalize(selected) }
+
     val shown = if (nearYouOnly && userLoc != null) {
         val (uLat, uLng) = userLoc
         categoryFiltered.filter { b ->
@@ -366,6 +454,7 @@ fun BrandsScreen(
 
     // shared click lambda so a tile selects the brand for redeem too
     val onTileClick: (Brand) -> Unit = { b ->
+        selectedBrandForAdmin = b
         selectedBrandForRedeem = b
         onBrandClick(b)
     }
@@ -415,6 +504,9 @@ fun BrandsScreen(
 
             OutlinedButton(onClick = { showAddBrand = true }) { Text("Add Brand") }
 
+            //selectedBrandForAdmin = created
+            selectedBrandForAdmin?.let { Text("Selected: ${it.name}", style = MaterialTheme.typography.labelMedium) }
+
             // Keep this inside the same Column as the button, but outside lazy lists.
             if (showAddBrand) {
                 AddBrandDialog(
@@ -422,16 +514,20 @@ fun BrandsScreen(
                     onCreate = { created ->
                         BrandRepo.addBrand(created)   // updates repo and recomposes UI
                         showAddBrand = false
+                        selectedBrandForAdmin = created     // ✅ enables Manage Brand immediately
+                        selectedBrandForRedeem = created
                     }
                 )
             }
 
+            /*
             Spacer(Modifier.height(8.dp))
             // Button next to Add Brand / header (enable only when selected)
             Button(
                 onClick = { showAdmin = true },
                 enabled = selectedBrandForAdmin != null
             ) { Text("Manage Brand") }
+            */
 
 // Open admin screen when allowed
             if (showAdmin && selectedBrandForAdmin != null) {
@@ -441,6 +537,7 @@ fun BrandsScreen(
                     onSave = { updated ->
                         // ✅ Ask the repository to update the brand instead of trying to mutate the list
                         BrandRepo.updateBrand(updated)
+                        selectedBrandForAdmin = updated  // keep selection current
                     }
                 )
             }
@@ -453,15 +550,11 @@ fun BrandsScreen(
                     BrandTile(
                         b = b,
                         onClick = onTileClick,
-                        onEdit = { updated ->
-                            BrandRepo.updateBrand(updated)
-                            selectedBrandForAdmin = updated                // preselect for admin view
-                        },
+                        onEdit = { updated -> BrandRepo.updateBrand(updated) },
                         currentUserId = currentUserId,
-                        openOwnerPanel = { selectedBrandForOwner = it },
                         onManage = { selected ->
                             selectedBrandForAdmin = selected
-                            showAdmin = true                               // 👈 opens admin screen below
+                            showAdmin = true                   // open right away
                         }
                     )
                 }

@@ -226,6 +226,44 @@ fun BrandAdminScreen(
 
             Spacer(Modifier.height(12.dp))
 
+            // 🟢 Section: Add a new product / offer for this brand
+            Spacer(Modifier.height(24.dp))
+            Text("Add New Offer / Item",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            var title by remember { mutableStateOf("") }
+            var subtitle by remember { mutableStateOf("") }
+            var price by remember { mutableStateOf("") }
+            var discount by remember { mutableStateOf("") }
+
+            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Item Title") })
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(value = subtitle, onValueChange = { subtitle = it }, label = { Text("Subtitle") })
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(value = discount, onValueChange = { discount = it }, label = { Text("Discount Text") })
+            Spacer(Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    BrandRepo.addItem(
+                        BrandItem(
+                            brandId = brand.id,       // link item to this brand
+                            title = title,
+                            subtitle = subtitle,
+                            price = price,
+                            discountText = discount
+                        )
+                    )
+                    title = ""; subtitle = ""; price = ""; discount = ""
+                    android.widget.Toast.makeText(ctx, "Item added!", android.widget.Toast.LENGTH_SHORT).show()
+                },
+                enabled = title.isNotBlank()
+            ) { Text("Add Item") }
+
             // 4) Push notification (demo)
             FilledTonalButton(
                 enabled = enabled && nearbyUsers.isNotEmpty(),
